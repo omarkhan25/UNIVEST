@@ -24,9 +24,10 @@ import { TradeDrawer } from '../components/dashboard/TradeDrawer';
 import { NotificationCenterModal } from '../components/dashboard/NotificationCenterModal';
 import { NewsDetail } from '../components/dashboard/NewsDetail';
 import { AiCopilotModal } from '../components/ai/AiCopilotModal';
+import { LearningCenter } from '../components/dashboard/LearningCenter';
 import { MarketIntelligenceCenter } from '../components/dashboard/MarketIntelligenceCenter';
 import { LiveMarketStatusWidget } from '../components/dashboard/LiveMarketStatusWidget';
-import { Newspaper } from 'lucide-react';
+import { Newspaper, GraduationCap } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 
 interface SidebarItemProps {
@@ -180,6 +181,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
     { name: 'Invest', icon: <Compass className="w-5 h-5" />, label: 'Invest' },
     { name: 'Portfolio', icon: <Briefcase className="w-5 h-5" />, label: 'Portfolio' },
     { name: 'News', icon: <Newspaper className="w-5 h-5" />, label: 'News', badgeCount: 4 },
+    { name: 'Academy', icon: <GraduationCap className="w-5 h-5" />, label: 'Academy' },
     { name: 'Profile', icon: <User className="w-5 h-5" />, label: 'Profile' },
   ];
 
@@ -456,6 +458,12 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 onSelectStock={(st) => setSelectedStock(st)}
                 onSelectResearch={(res) => setSelectedResearch(res)}
                 onTrade={(tr) => setTradeIntent(tr)}
+              />
+            )}
+            {activeTab === 'Academy' && (
+              <LearningCenter
+                onSelectStock={(st) => setSelectedStock(st)}
+                onSelectResearch={(res) => setSelectedResearch(res)}
               />
             )}
             {activeTab === 'Profile' && <ProfileDashboard />}
