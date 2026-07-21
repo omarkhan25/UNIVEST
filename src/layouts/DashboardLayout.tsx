@@ -11,6 +11,19 @@ import {
 import { MarketRibbon } from '../components/dashboard/MarketRibbon';
 import { InvestHub } from '../components/dashboard/InvestHub';
 import { ResearchCenter } from '../components/dashboard/ResearchCenter';
+import { PortfolioDashboard } from '../components/portfolio/PortfolioDashboard';
+import { ProfileDashboard } from '../components/profile/ProfileDashboard';
+import { UserMenuDropdown } from '../components/dashboard/UserMenuDropdown';
+import { UniversalSearch } from '../components/dashboard/UniversalSearch';
+import { StockDetail } from '../components/dashboard/StockDetail';
+import { ResearchDetail } from '../components/dashboard/ResearchDetail';
+import { ReportViewer } from '../components/dashboard/ReportViewer';
+import { AnalystProfileModal } from '../components/dashboard/AnalystProfileModal';
+import { TradeDrawer } from '../components/dashboard/TradeDrawer';
+import { MarketIntelligenceCenter } from '../components/dashboard/MarketIntelligenceCenter';
+import { LiveMarketStatusWidget } from '../components/dashboard/LiveMarketStatusWidget';
+import { Newspaper } from 'lucide-react';
+import { Toaster } from 'react-hot-toast';
 
 interface SidebarItemProps {
   icon: React.ReactNode;
@@ -27,19 +40,36 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-button text-sm font-semibold transition-all duration-200 ${
+      className={`group relative w-full flex items-center justify-between px-4 py-3.5 mb-1 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden ${
         active
-          ? 'bg-primary text-white shadow-premium hover:shadow-glow-blue'
-          : 'text-brand-secondary hover:text-brand-navy hover:bg-slate-100'
+          ? 'text-white'
+          : 'text-slate-500 hover:text-slate-900'
       }`}
     >
-      <div className="flex items-center gap-3.5">
-        <span className="flex-shrink-0">{icon}</span>
-        {!collapsed && <span>{label}</span>}
+      {/* Active State Background & Glow */}
+      {active && (
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-[0_8px_20px_-6px_rgba(79,70,229,0.5)]" />
+      )}
+      
+      {/* Hover State Background */}
+      {!active && (
+        <div className="absolute inset-0 bg-slate-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+      )}
+
+      <div className="relative z-10 flex items-center gap-3.5 w-full">
+        <span className={`flex-shrink-0 transition-all duration-300 ${active ? 'scale-110 drop-shadow-md text-white' : 'group-hover:scale-110 text-slate-400 group-hover:text-blue-600'}`}>
+          {icon}
+        </span>
+        {!collapsed && (
+          <span className="truncate flex-1 text-left tracking-wide">{label}</span>
+        )}
       </div>
+      
       {!collapsed && badgeCount && badgeCount > 0 ? (
-        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-          active ? 'bg-white text-primary' : 'bg-rose-500 text-white animate-pulse'
+        <span className={`relative z-10 ml-2 flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-black rounded-full border shadow-sm transition-all duration-300 ${
+          active 
+            ? 'bg-white/20 border-white/30 text-white backdrop-blur-md' 
+            : 'bg-rose-50 border-rose-100 text-rose-600 group-hover:bg-rose-500 group-hover:text-white group-hover:border-rose-500'
         }`}>
           {badgeCount}
         </span>
@@ -77,6 +107,14 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   const [aiOpen, setAiOpen] = useState(false);
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const [workspaceTab, setWorkspaceTab] = useState<'watchlists' | 'research' | 'alerts' | 'ai'>('watchlists');
+  
+  // Universal Search & Interactivity State
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [selectedStock, setSelectedStock] = useState<any | null>(null);
+  const [selectedResearch, setSelectedResearch] = useState<any | null>(null);
+  const [selectedReport, setSelectedReport] = useState<any | null>(null);
+  const [selectedAnalyst, setSelectedAnalyst] = useState<any | null>(null);
+  const [tradeIntent, setTradeIntent] = useState<any | null>(null);
   
   // Custom Watchlists state
   const [customWatchlists, setCustomWatchlists] = useState<CustomWatchlist[]>([
@@ -120,6 +158,9 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Hover item overlay
   const [hoveredStockSymbol, setHoveredStockSymbol] = useState<string | null>(null);
+  
+  // User menu dropdown
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const [chatMessages, setChatMessages] = useState<string[]>([
     'Hello Omar! I am your Univest AI Assistant. How can I help you build wealth today?',
@@ -131,6 +172,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
     { name: 'Research', icon: <TrendingUp className="w-5 h-5" />, label: 'Research', badgeCount: 3 },
     { name: 'Invest', icon: <Compass className="w-5 h-5" />, label: 'Invest' },
     { name: 'Portfolio', icon: <Briefcase className="w-5 h-5" />, label: 'Portfolio' },
+    { name: 'News', icon: <Newspaper className="w-5 h-5" />, label: 'News', badgeCount: 4 },
     { name: 'Profile', icon: <User className="w-5 h-5" />, label: 'Profile' },
   ];
 
@@ -332,57 +374,56 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
       <div className="flex-1 flex flex-col min-w-0">
         
         {/* DESKTOP TOP HEADER */}
-        <header className="hidden lg:flex h-20 bg-white border-b border-brand-border items-center justify-between px-8 sticky top-0 z-20">
-          <div>
-            <h2 className="text-lg font-black text-brand-navy">{activeTab} Hub</h2>
-            <p className="text-[11px] text-brand-secondary">Explore stock advisories, charts and economic screeners.</p>
+        <header className="hidden lg:flex h-20 bg-white border-b border-[#E2E8F0] items-center justify-between px-8 sticky top-0 z-40">
+
+          {/* Universal Search Bar */}
+          <div 
+            onClick={() => setIsSearchOpen(true)}
+            className="flex w-full max-w-md items-center gap-2.5 h-10 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-4 text-slate-500 transition-all hover:border-blue-400 hover:bg-white cursor-pointer select-none shadow-2xs"
+          >
+            <Search className="h-4 w-4 shrink-0 text-blue-600" />
+            <span className="min-w-0 flex-1 text-xs font-medium text-slate-400">Search stocks, research, mutual funds, IPOs...</span>
+            <kbd className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[9px] font-bold text-slate-400">⌘ K</kbd>
           </div>
 
-          {activeTab !== 'Research' ? (
-            <label className="mx-8 flex w-full max-w-lg items-center gap-2.5 rounded-xl border border-brand-border bg-slate-50 px-3.5 py-2.5 text-brand-secondary transition focus-within:border-primary focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/10">
-              <Search className="h-4 w-4 shrink-0 text-primary" />
-              <input
-                type="search"
-                aria-label="Search research, stocks, or markets"
-                placeholder="Search stocks, research, or markets..."
-                className="min-w-0 flex-1 bg-transparent text-xs font-medium text-brand-navy outline-none placeholder:text-slate-400"
-              />
-              <kbd className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[9px] font-semibold text-slate-400">⌘ K</kbd>
-            </label>
-          ) : (
-            <div className="flex-1" />
-          )}
-
-          {/* Portfolio Performance Summary Widget */}
-          <div className="hidden xl:flex flex-col gap-0.5 select-none text-left">
-            <span className="text-[10px] font-bold text-brand-secondary uppercase tracking-wider">Your portfolio value</span>
-            <div className="flex items-center gap-2.5">
-              <span className="font-black text-base text-[#0F172A]">₹8,42,150</span>
-              <span className="font-black text-xs text-[#16A34A] flex items-center gap-0.5">
-                <TrendingUp className="w-3.5 h-3.5 text-[#16A34A]" /> +₹12,840 (+1.55%)
-              </span>
-            </div>
-          </div>
-
+          {/* Right Header Action Items */}
           <div className="flex items-center gap-3">
+            {/* Live Market Status Widget */}
+            <LiveMarketStatusWidget />
+
             {/* Desktop Premium Workspace trigger */}
             <button 
               onClick={() => setWorkspaceOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 h-10 rounded-xl border border-brand-border bg-white text-[#0F172A] hover:bg-slate-50 hover:border-blue-200 transition-colors"
+              className="flex items-center gap-1.5 px-3.5 h-10 rounded-full border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50 hover:border-blue-200 transition-colors shadow-2xs cursor-pointer"
             >
               <Bookmark className="w-4 h-4 text-slate-500" />
               <span className="text-xs font-black">Workspace</span>
             </button>
 
-            <button className="relative grid h-10 w-10 place-items-center rounded-xl border border-brand-border bg-white text-brand-secondary transition hover:border-blue-200 hover:bg-blue-50 hover:text-primary" aria-label="Notifications">
+            {/* Notifications Bell */}
+            <button 
+              className="relative grid h-10 w-10 place-items-center rounded-full border border-[#E2E8F0] bg-white text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 shadow-2xs cursor-pointer" 
+              aria-label="Notifications"
+            >
               <Bell className="h-4 w-4" />
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full border-2 border-white bg-rose-500" />
             </button>
-            <button className="flex items-center gap-2 rounded-xl border border-brand-border bg-white py-1.5 pl-1.5 pr-2.5 text-left transition hover:border-blue-200 hover:bg-slate-50" aria-label="Open profile menu">
-              <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-primary to-blue-700 text-[10px] font-black text-white">OK</span>
-              <span className="hidden xl:block"><span className="block text-[11px] font-bold leading-4 text-brand-navy">Omar Khan</span><span className="block text-[9px] leading-3 text-brand-secondary">Verified investor</span></span>
-              <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-            </button>
+
+            {/* User Profile Menu */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsUserMenuOpen(true)}
+                className="flex items-center gap-2 h-10 rounded-full border border-[#E2E8F0] bg-white py-1 pl-1 pr-3 text-left transition hover:border-blue-200 hover:bg-slate-50 shadow-2xs cursor-pointer" 
+                aria-label="Open profile menu"
+              >
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-blue-600 to-blue-800 text-[10px] font-black text-white">OK</span>
+                <span className="hidden xl:block">
+                  <span className="block text-[11px] font-bold leading-tight text-[#0F172A]">Omar Khan</span>
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 text-slate-400 ml-0.5" />
+              </button>
+              <UserMenuDropdown isOpen={isUserMenuOpen} onClose={() => setIsUserMenuOpen(false)} />
+            </div>
           </div>
         </header>
 
@@ -390,92 +431,26 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
 
         {/* Primary Page Content Grid Area */}
         <main className="flex-1 w-full p-6 flex flex-col gap-6">
-          
-          {/* PREMIUM HORIZONTAL INVESTMENT HUB GATEWAY */}
-          {activeTab === 'Invest' && (
-            <div className="w-full flex flex-col gap-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Investment Hub Gateway</span>
-              <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-none no-scrollbar">
-                {[
-                  { id: 'stocks', name: 'Stocks', subtitle: '12,500+ Companies', icon: 'bar-chart', liveIndicator: 'NSE Live' },
-                  { id: 'fno', name: 'Futures & Options', subtitle: 'High Activity Today', icon: 'candlestick', liveIndicator: 'PCR 1.12', aiBadge: true },
-                  { id: 'funds', name: 'Mutual Funds', subtitle: '1,200+ Funds', icon: 'wallet', liveIndicator: '2 Funds Up' },
-                  { id: 'gold', name: 'Gold', subtitle: 'Digital Gold & SGB', icon: 'gem', liveIndicator: 'SGB 2.5%' },
-                  { id: 'commodities', name: 'Commodities', subtitle: 'Live Prices', icon: 'fuel', liveIndicator: 'Crude ▲1.2%' },
-                  { id: 'ipo', name: 'IPO', subtitle: 'Open & Upcoming', icon: 'rocket', liveIndicator: '1 Open', aiBadge: true },
-                  { id: 'etf', name: 'ETFs', subtitle: 'Equity & Gold', icon: 'layers', liveIndicator: 'Nifty Junior' },
-                  { id: 'bonds', name: 'FD & Bonds', subtitle: 'Fixed Income', icon: 'landmark', liveIndicator: 'NHAI 7.35%' },
-                  { id: 'nps', name: 'NPS', subtitle: 'Retirement Plan', icon: 'shield', liveIndicator: 'Tax Free' },
-                  { id: 'more', name: 'More', subtitle: 'Extra Products', icon: 'more', liveIndicator: 'AI Rated' }
-                ].map((cat) => {
-                  const isActive = activeTab === 'Invest' && activeInvestCategory === cat.id;
-                  return (
-                    <motion.button
-                      whileHover={{ y: -3 }}
-                      key={cat.id}
-                      onClick={() => {
-                        setActiveInvestCategory(cat.id);
-                        setActiveTab('Invest');
-                      }}
-                      className={`group snap-center shrink-0 min-w-[200px] bg-white border rounded-[22px] p-4 text-left transition-all duration-200 hover:shadow-premium select-none relative overflow-hidden flex flex-col justify-between h-[105px] ${
-                        isActive 
-                          ? 'border-[#2563EB] ring-2 ring-[#2563EB]/10' 
-                          : 'border-[#E2E8F0] hover:border-[#2563EB]'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between w-full">
-                        <span className="text-slate-500 group-hover:text-primary transition-colors shrink-0">
-                          {cat.icon === 'bar-chart' && <BarChart3 className="w-5 h-5" />}
-                          {cat.icon === 'candlestick' && <CandlestickChart className="w-5 h-5" />}
-                          {cat.icon === 'wallet' && <Wallet className="w-5 h-5" />}
-                          {cat.icon === 'gem' && <Gem className="w-5 h-5" />}
-                          {cat.icon === 'fuel' && <Fuel className="w-5 h-5" />}
-                          {cat.icon === 'rocket' && <Rocket className="w-5 h-5" />}
-                          {cat.icon === 'layers' && <Layers className="w-5 h-5" />}
-                          {cat.icon === 'landmark' && <Landmark className="w-5 h-5" />}
-                          {cat.icon === 'shield' && <Shield className="w-5 h-5" />}
-                          {cat.icon === 'more' && <MoreHorizontal className="w-5 h-5" />}
-                        </span>
-                        
-                        <div className="flex items-center gap-1 shrink-0">
-                          {cat.aiBadge && (
-                            <span className="text-[8px] font-black bg-blue-50 text-[#2563EB] border border-blue-100 px-1 rounded uppercase">
-                              AI
-                            </span>
-                          )}
-                          <span className="text-[8px] font-black px-1.5 py-0.2 rounded bg-slate-100 text-[#64748B] shrink-0">
-                            {cat.liveIndicator}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="mt-2 text-left">
-                        <span className="text-xs font-black text-[#0F172A] block">{cat.name}</span>
-                        <span className="text-[9px] text-[#64748B] block mt-0.5 leading-normal truncate">{cat.subtitle}</span>
-                      </div>
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
           <div className="flex-1">
             {activeTab === 'Home' && children}
-            {activeTab === 'Invest' && <InvestHub activeCategory={activeInvestCategory} />}
+            {activeTab === 'Invest' && (
+              <InvestHub 
+                activeCategory={activeInvestCategory}
+                onSelectStock={(st) => setSelectedStock(st)}
+                onSelectResearch={(res) => setSelectedResearch(res)}
+                onTrade={(tr) => setTradeIntent(tr)}
+              />
+            )}
             {activeTab === 'Research' && <ResearchCenter />}
-            {activeTab === 'Portfolio' && (
-              <div className="bg-white p-6 rounded-3xl border border-[#E2E8F0] shadow-sm">
-                <h3 className="text-base font-black text-brand-navy mb-2">My Portfolios</h3>
-                <p className="text-xs text-brand-secondary">Track and manage your multi-broker accounts.</p>
-              </div>
+            {activeTab === 'Portfolio' && <PortfolioDashboard />}
+            {activeTab === 'News' && (
+              <MarketIntelligenceCenter
+                onSelectStock={(st) => setSelectedStock(st)}
+                onSelectResearch={(res) => setSelectedResearch(res)}
+                onTrade={(tr) => setTradeIntent(tr)}
+              />
             )}
-            {activeTab === 'Profile' && (
-              <div className="bg-white p-6 rounded-3xl border border-[#E2E8F0] shadow-sm">
-                <h3 className="text-base font-black text-brand-navy mb-2">User Profile</h3>
-                <p className="text-xs text-brand-secondary">Manage risk profiles, settings and verification keys.</p>
-              </div>
-            )}
+            {activeTab === 'Profile' && <ProfileDashboard />}
           </div>
         </main>
       </div>
@@ -1053,17 +1028,6 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 </div>
               </div>
 
-              {/* Description */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Description</label>
-                <textarea 
-                  placeholder="Optional description..."
-                  value={newWatchlistDesc}
-                  onChange={(e) => setNewWatchlistDesc(e.target.value)}
-                  className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs text-brand-navy outline-none focus:border-blue-600 h-16 resize-none"
-                />
-              </div>
-
               <button 
                 type="submit"
                 className="w-full py-2.5 bg-brand-navy hover:bg-slate-800 text-xs font-black text-white rounded-xl shadow-premium mt-1 transition-colors"
@@ -1074,6 +1038,63 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           </div>
         )}
       </AnimatePresence>
+
+      {/* GLOBAL UNIVERSAL SEARCH & WORKSPACE MODALS */}
+      <UniversalSearch
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        onSelectStock={(stock) => setSelectedStock(stock)}
+        onSelectResearch={(res) => setSelectedResearch(res)}
+        onSelectReport={(rep) => setSelectedReport(rep)}
+        onSelectAnalyst={(an) => setSelectedAnalyst(an)}
+      />
+
+      <AnimatePresence>
+        {selectedStock && (
+          <StockDetail
+            isOpen={true}
+            onClose={() => setSelectedStock(null)}
+            companyName={selectedStock?.company || selectedStock?.name}
+            symbol={selectedStock?.symbol}
+            logo={selectedStock?.logo}
+            onTrade={(t) => setTradeIntent(t)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {selectedResearch && (
+          <ResearchDetail
+            isOpen={true}
+            onClose={() => setSelectedResearch(null)}
+            research={selectedResearch}
+            onTrade={(t) => setTradeIntent(t)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {selectedReport && (
+          <ReportViewer
+            isOpen={true}
+            onClose={() => setSelectedReport(null)}
+            report={selectedReport}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnalystProfileModal
+        isOpen={!!selectedAnalyst}
+        onClose={() => setSelectedAnalyst(null)}
+        analyst={selectedAnalyst}
+        onSelectResearch={(res) => setSelectedResearch(res)}
+      />
+
+      <TradeDrawer
+        isOpen={!!tradeIntent}
+        onClose={() => setTradeIntent(null)}
+        research={tradeIntent}
+      />
 
     </div>
   );

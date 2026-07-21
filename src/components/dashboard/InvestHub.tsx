@@ -1,293 +1,718 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download } from 'lucide-react';
+import { 
+  BarChart3, CandlestickChart, Wallet, Gem, Fuel, Rocket, 
+  Layers, Landmark, Shield, MoreHorizontal, Sparkles, TrendingUp,
+  SlidersHorizontal, ArrowRight, Bookmark, ArrowUpDown, RefreshCw,
+  Calculator, CheckCircle2, ShieldCheck, Zap, AlertCircle, HelpCircle,
+  X, Filter, Compass, Plus, ExternalLink, ChevronLeft, ChevronRight
+} from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export interface InvestHubProps {
-  activeCategory: string;
+  activeCategory?: string;
+  onSelectStock?: (stock: any) => void;
+  onSelectResearch?: (research: any) => void;
+  onTrade?: (trade: any) => void;
 }
 
 export const InvestHub: React.FC<InvestHubProps> = ({
-  activeCategory
+  activeCategory = 'all',
+  onSelectStock,
+  onSelectResearch,
+  onTrade
 }) => {
+  const [selectedCategory, setSelectedCategory] = useState<string>(activeCategory === 'stocks' ? 'stocks' : 'all');
+  const [activeCollection, setActiveCollection] = useState<string>('All');
+  const [sortOption, setSortOption] = useState<string>('Popularity');
+  const [bookmarkedItems, setBookmarkedItems] = useState<Record<string, boolean>>({});
+
+  // Scroll Container Ref for Minimalist Asset Classes Navigation
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = direction === 'left' ? -320 : 320;
+      scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  // Tool Calculator Modal State
+  const [activeToolModal, setActiveToolModal] = useState<string | null>(null);
+  const [sipMonthly, setSipMonthly] = useState<number>(10000);
+  const [sipYears, setSipYears] = useState<number>(10);
+  const [sipReturnRate, setSipReturnRate] = useState<number>(14);
+
+  // Toggle Bookmark
+  const toggleBookmark = (id: string, name: string) => {
+    const nextState = !bookmarkedItems[id];
+    setBookmarkedItems(prev => ({ ...prev, [id]: nextState }));
+    toast.success(nextState ? `Saved ${name} to Workspace` : `Removed ${name}`);
+  };
+
+  // SIP Calculator Math
+  const months = sipYears * 12;
+  const i = sipReturnRate / 12 / 100;
+  const investedVal = sipMonthly * months;
+  const estMaturity = Math.round(sipMonthly * ((Math.pow(1 + i, months) - 1) / i) * (1 + i));
+  const estWealthGain = Math.max(0, estMaturity - investedVal);
+
+  // Categories Data
+  const categoriesList = [
+    { id: 'all', name: 'All Products', count: 'Explore All', icon: <Compass className="w-5 h-5 text-blue-600" /> },
+    { id: 'stocks', name: 'Stocks', count: '12,500+ Companies', icon: <BarChart3 className="w-5 h-5 text-blue-600" /> },
+    { id: 'funds', name: 'Mutual Funds', count: '1,500+ Funds', icon: <Wallet className="w-5 h-5 text-emerald-600" /> },
+    { id: 'etf', name: 'ETFs', count: '320 Available', icon: <Layers className="w-5 h-5 text-indigo-600" /> },
+    { id: 'ipo', name: 'IPO', count: '4 Open Today', icon: <Rocket className="w-5 h-5 text-amber-600" /> },
+    { id: 'gold', name: 'Gold', count: '₹7,240 / gram', icon: <Gem className="w-5 h-5 text-amber-500" /> },
+    { id: 'commodities', name: 'Commodities', count: 'MCX Live', icon: <Fuel className="w-5 h-5 text-rose-600" /> },
+    { id: 'bonds', name: 'FD & Bonds', count: '7.35% Yield', icon: <Landmark className="w-5 h-5 text-teal-600" /> },
+    { id: 'nps', name: 'NPS', count: 'Tax Free', icon: <Shield className="w-5 h-5 text-[#2563EB]" /> },
+    { id: 'more', name: 'More', count: 'PMS & Smallcase', icon: <MoreHorizontal className="w-5 h-5 text-slate-500" /> }
+  ];
+
+  // Featured Opportunities
+  const featuredOpportunities = [
+    {
+      id: 'f1',
+      name: 'Reliance Industries Ltd',
+      symbol: 'RELIANCE',
+      category: 'Stocks',
+      price: '₹3,024.50',
+      change: '+1.45%',
+      isPositive: true,
+      aiBadge: '94% AI Confidence',
+      risk: 'Low Risk',
+      returnRange: '+14% Expected',
+      logo: 'RL',
+      desc: 'Consolidation breakout verified on daily frames. Hydrogen commissioning projected for late Q3.'
+    },
+    {
+      id: 'f2',
+      name: 'Parag Parikh Flexi Cap Fund',
+      symbol: 'PPFCF',
+      category: 'Mutual Funds',
+      price: 'NAV: ₹74.85',
+      change: '+24.8% 3Y CAGR',
+      isPositive: true,
+      aiBadge: '5★ Rated Fund',
+      risk: 'Moderate Risk',
+      returnRange: '24.8% Annual',
+      logo: 'PP',
+      desc: 'Diversified allocation across top Indian market leaders and international tech giants.'
+    },
+    {
+      id: 'f3',
+      name: 'Ola Electric Mobility IPO',
+      symbol: 'OLA-IPO',
+      category: 'IPO',
+      price: '₹72 - ₹76',
+      change: 'GMP +18%',
+      isPositive: true,
+      aiBadge: '4.2★ Rating',
+      risk: 'Moderate Risk',
+      returnRange: 'Listing Premium',
+      logo: 'OE',
+      desc: 'India’s largest EV 2-wheeler manufacturer opening for retail subscription bidding.'
+    }
+  ];
+
+  // Trending Investments
+  const trendingStocks = [
+    { name: 'HDFC Bank Ltd', symbol: 'HDFCBANK', price: '₹1,682.40', change: '+0.85%', '1m': '+4.2%', risk: 'Low', logo: 'HD' },
+    { name: 'Larsen & Toubro Ltd', symbol: 'LT', price: '₹3,456.90', change: '+1.05%', '1m': '+6.8%', risk: 'Low', logo: 'LT' },
+    { name: 'Tata Consultancy Services', symbol: 'TCS', price: '₹4,185.10', change: '+0.82%', '1m': '+3.5%', risk: 'Low', logo: 'TC' }
+  ];
+
+  const trendingFunds = [
+    { name: 'Quant Active Fund Direct Growth', symbol: 'QUANT-ACT', price: 'NAV: ₹384.20', change: '+29.2% 3Y', '1m': '+5.4%', risk: 'Moderate', logo: 'QA' },
+    { name: 'Axis Bluechip Fund', symbol: 'AXIS-BLUE', price: 'NAV: ₹58.10', change: '+18.4% 3Y', '1m': '+2.8%', risk: 'Low', logo: 'AB' }
+  ];
+
+  const trendingIPOs = [
+    { name: 'Ola Electric Mobility IPO', symbol: 'OLA-IPO', price: '₹72 - 76', change: 'GMP +18%', status: 'Bidding Open', logo: 'OE' },
+    { name: 'FirstCry India IPO', symbol: 'FIRSTCRY', price: '₹420 - 450', change: 'GMP +24%', status: 'Closing Soon', logo: 'FC' }
+  ];
+
+  const trendingGold = [
+    { name: 'Sovereign Gold Bonds (SGB Series III)', symbol: 'SGB-2026', price: '₹6,840 / g', change: '2.5% p.a. Interest', status: 'Tax Free at Exit', logo: 'GB' },
+    { name: '24K Digital Gold Vault (99.9%)', symbol: 'DIGI-GOLD', price: '₹7,240 / g', change: 'Pure 24K Vault', status: 'Instant Liquidity', logo: 'DG' }
+  ];
+
+  // Curated Collections
+  const collections = [
+    { id: 'All', label: 'All Collections' },
+    { id: 'Beginner', label: 'Beginner Friendly' },
+    { id: 'LongTerm', label: 'Long Term Wealth' },
+    { id: 'HighGrowth', label: 'High Growth' },
+    { id: 'Dividend', label: 'Dividend Income' },
+    { id: 'LowRisk', label: 'Low Risk' },
+    { id: 'TaxSaving', label: 'Tax Saving (80C)' }
+  ];
+
+  // AI Personal Suggestions
+  const aiRecommendations = [
+    {
+      title: 'HDFC Bank Accumulation Setup',
+      reason: 'Institutional net accumulation near multi-month support bounds aligned with your conservative profile.',
+      confidence: 96,
+      horizon: '3 - 6 Months',
+      risk: 'Low Risk',
+      symbol: 'HDFCBANK',
+      logo: 'HD'
+    },
+    {
+      title: 'Parag Parikh Flexi Cap SIP',
+      reason: 'Ideal for long-term equity growth with automated global technology exposure.',
+      confidence: 94,
+      horizon: '3+ Years',
+      risk: 'Moderate Risk',
+      symbol: 'PPFCF',
+      logo: 'PP'
+    }
+  ];
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8 w-full pb-16">
       
-      {/* Dynamic Content Panel Area */}
-      <div className="w-full">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeCategory}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.22 }}
-          >
-            {/* STOCKS HUB */}
-            {activeCategory === 'stocks' && (
-              <div className="flex flex-col gap-5">
-                {/* Hero Summary */}
-                <div className="bg-gradient-to-tr from-blue-50 to-indigo-50 border border-blue-200/50 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-sm font-black text-brand-navy">Indian Equities Market</h3>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Explore large, mid and small-cap stocks with SEBI research guidance.</p>
-                  </div>
-                  <div className="flex items-center gap-4 text-xs font-semibold">
-                    <div>
-                      <span className="text-slate-400 text-[9px] uppercase block">Horizon</span>
-                      <span className="text-slate-700 font-extrabold">Short to Long Term</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 text-[9px] uppercase block">Risk Level</span>
-                      <span className="text-amber-600 font-extrabold">Medium to High</span>
-                    </div>
-                  </div>
-                </div>
+      {/* PAGE HEADER */}
+      <div className="w-full pt-2 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#0F172A] mb-2">
+            Invest
+          </h1>
+          <p className="text-sm text-slate-500 font-medium">
+            Discover investment opportunities across multiple asset classes in one marketplace.
+          </p>
+        </div>
 
-                {/* Stock Movers Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white border border-[#E2E8F0] p-5 rounded-2xl shadow-sm">
-                    <h4 className="text-[10px] font-black uppercase text-slate-400 mb-3">Trending Movers</h4>
-                    <div className="flex flex-col gap-2.5">
-                      {[{ s: 'RELIANCE', p: '₹3,024.20', c: '+1.25%' }, { s: 'BHARTIAIRTEL', p: '₹1,420.50', c: '+3.11%' }].map(x => (
-                        <div key={x.s} className="flex justify-between items-center text-xs border-b border-slate-50 pb-2 last:border-0 last:pb-0">
-                          <span className="font-extrabold text-[#0F172A]">{x.s}</span>
-                          <span className="font-black text-[#16A34A]">{x.p} ({x.c})</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bg-white border border-[#E2E8F0] p-5 rounded-2xl shadow-sm flex flex-col justify-between">
-                    <div>
-                      <h4 className="text-[10px] font-black uppercase text-slate-400 mb-1">AI Opportunity Recommendation</h4>
-                      <span className="text-[11px] font-black text-blue-600 block mt-1.5">HDFCBANK Buy Signal</span>
-                      <p className="text-[10.5px] text-slate-500 mt-1">Accumulation levels identified near multi-month support bounds.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-3.5 py-2 rounded-2xl text-xs font-black text-emerald-800">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Market Status: LIVE</span>
+          </div>
 
-            {/* FUTURES & OPTIONS */}
-            {activeCategory === 'fno' && (
-              <div className="flex flex-col gap-5">
-                <div className="bg-slate-900 text-white rounded-2xl p-5 relative overflow-hidden">
-                  <h3 className="text-sm font-black">Derivatives Desk (F&O)</h3>
-                  <p className="text-[11px] text-slate-300 mt-0.5">Track option chains, open interest metrics and volatility indices.</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-white border border-[#E2E8F0] p-4 rounded-2xl">
-                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Nifty PCR (Put Call Ratio)</span>
-                    <span className="text-xl font-black text-slate-800 block mt-1">1.12</span>
-                    <span className="text-[9px] text-[#16A34A] block mt-0.5">Bullish Sentiment</span>
-                  </div>
-                  <div className="bg-white border border-[#E2E8F0] p-4 rounded-2xl">
-                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Max Pain Strike</span>
-                    <span className="text-xl font-black text-slate-800 block mt-1">22,400</span>
-                    <span className="text-[9px] text-slate-400 block mt-0.5">Expiry: Weekly 23 JUL</span>
-                  </div>
-                  <div className="bg-white border border-[#E2E8F0] p-4 rounded-2xl">
-                    <span className="text-[9px] font-bold text-slate-400 block uppercase">Implied Volatility (IV)</span>
-                    <span className="text-xl font-black text-slate-800 block mt-1">12.8%</span>
-                    <span className="text-[9px] text-slate-400 block mt-0.5">Low VIX Environment</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* MUTUAL FUNDS */}
-            {activeCategory === 'funds' && (
-              <div className="flex flex-col gap-5">
-                <div className="bg-gradient-to-tr from-emerald-50 to-teal-50 border border-emerald-200/50 rounded-2xl p-4">
-                  <h3 className="text-sm font-black text-[#0F172A]">Mutual Funds & SIPs</h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Invest in expert-managed baskets across equity, debt, and hybrid assets.</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white border border-[#E2E8F0] p-4 rounded-2xl flex flex-col justify-between gap-4">
-                    <div>
-                      <span className="text-[10px] font-black text-slate-400 block uppercase">Top Performing Small Cap</span>
-                      <h4 className="text-xs font-black text-slate-800 mt-1">Quant Active Fund Direct-Growth</h4>
-                    </div>
-                    <span className="text-xs font-black text-[#16A34A]">Returns: 29.2% (3Y CAGR)</span>
-                  </div>
-                  <div className="bg-white border border-[#E2E8F0] p-4 rounded-2xl flex flex-col justify-between gap-4">
-                    <div>
-                      <span className="text-[10px] font-black text-slate-400 block uppercase">Best Flexi Cap SIP</span>
-                      <h4 className="text-xs font-black text-slate-800 mt-1">Parag Parikh Flexi Cap Fund</h4>
-                    </div>
-                    <span className="text-xs font-black text-[#16A34A]">Returns: 24.8% (3Y CAGR)</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* COMMODITIES */}
-            {activeCategory === 'commodities' && (
-              <div className="flex flex-col gap-5">
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
-                  <h3 className="text-sm font-black text-[#0F172A]">MCX Commodities Desk</h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Track crude oil, silver, copper, and natural gas spot futures.</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[{ name: 'Crude Oil', price: '₹6,480', change: '+1.12%' }, { name: 'Natural Gas', price: '₹182.40', change: '-2.14%' }, { name: 'Silver Futures', price: '₹82,450', change: '+0.32%' }].map(c => (
-                    <div key={c.name} className="bg-white border border-slate-200 p-4 rounded-2xl">
-                      <span className="text-[9px] font-bold text-slate-400 uppercase block">{c.name}</span>
-                      <span className="text-base font-black text-slate-800 mt-1 block">{c.price}</span>
-                      <span className="text-[9px] font-bold text-[#16A34A] block mt-0.5">{c.change}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* GOLD */}
-            {activeCategory === 'gold' && (
-              <div className="flex flex-col gap-5">
-                <div className="bg-gradient-to-tr from-amber-50 to-yellow-50 border border-yellow-200/50 rounded-2xl p-4">
-                  <h3 className="text-sm font-black text-brand-navy">Gold Market Investments</h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Secure allocation in Sovereign Gold Bonds (SGB), Gold ETFs, or digital gold vaults.</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white border border-slate-200 p-4 rounded-2xl">
-                    <span className="text-[9px] font-black text-yellow-600 block uppercase">Sovereign Gold Bonds (SGB)</span>
-                    <p className="text-[10.5px] text-slate-500 mt-1">Get 2.5% p.a. assured interest + tax-free capital gains at maturity.</p>
-                  </div>
-                  <div className="bg-white border border-slate-200 p-4 rounded-2xl">
-                    <span className="text-[9px] font-black text-yellow-600 block uppercase">Digital Gold Vaults</span>
-                    <p className="text-[10.5px] text-slate-500 mt-1">Buy 24K 99.9% pure gold starting from ₹10 with physical delivery options.</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* IPO */}
-            {activeCategory === 'ipo' && (
-              <div className="flex flex-col gap-5">
-                <div className="bg-gradient-to-tr from-orange-50 to-rose-50 border border-orange-200/50 rounded-2xl p-4">
-                  <h3 className="text-sm font-black text-[#0F172A]">Initial Public Offerings (IPOs)</h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Discover and apply to upcoming primary stock market listings with subscription data.</p>
-                </div>
-
-                <div className="bg-white border border-slate-200 p-4 rounded-2xl flex flex-col gap-3">
-                  <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                    <div>
-                      <h4 className="text-xs font-black text-[#0F172A]">Ola Electric IPO</h4>
-                      <span className="text-[9px] text-slate-400">GMP Premium: +18% (₹14) • Rating: 4.2★</span>
-                    </div>
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black px-3 py-1.5 rounded-lg transition-colors">
-                      Apply Now
-                    </button>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h4 className="text-xs font-black text-[#0F172A]">FirstCry India IPO</h4>
-                      <span className="text-[9px] text-slate-400">GMP Premium: +24% (₹42) • Rating: 4.5★</span>
-                    </div>
-                    <button className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-black px-3 py-1.5 rounded-lg transition-colors">
-                      Apply Soon
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ETFs */}
-            {activeCategory === 'etf' && (
-              <div className="flex flex-col gap-5">
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
-                  <h3 className="text-sm font-black text-[#0F172A]">Exchange Traded Funds (ETFs)</h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">High-liquidity index-tracking baskets with lower expense ratios.</p>
-                </div>
-
-                <div className="bg-white border border-slate-200 p-4 rounded-2xl flex justify-between items-center">
-                  <div>
-                    <h4 className="text-xs font-black text-slate-800">Nippon India Junior BEES ETF</h4>
-                    <span className="text-[9px] text-slate-400">Tracks Nifty Next 50 • Expense Ratio: 0.15%</span>
-                  </div>
-                  <span className="text-xs font-black text-slate-800">₹624.50</span>
-                </div>
-              </div>
-            )}
-
-            {/* FD & BONDS */}
-            {activeCategory === 'bonds' && (
-              <div className="flex flex-col gap-5">
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
-                  <h3 className="text-sm font-black text-[#0F172A]">Fixed Income & Debt Market</h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Low-risk corporate fixed deposits, treasury bills, and government bonds.</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white border border-slate-200 p-4 rounded-2xl">
-                    <span className="text-[9px] font-black text-slate-400 block uppercase">Govt Treasury Bills (T-Bills)</span>
-                    <p className="text-[10.5px] text-slate-500 mt-1">91-Day Bills offering yields near 7.15% backed by Sovereign guarantee.</p>
-                  </div>
-                  <div className="bg-white border border-slate-200 p-4 rounded-2xl">
-                    <span className="text-[9px] font-black text-slate-400 block uppercase">AAA Corporate Bonds</span>
-                    <p className="text-[10.5px] text-slate-500 mt-1">NHAI tax-free coupons yielding up to 7.35% secure annual returns.</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* NPS */}
-            {activeCategory === 'nps' && (
-              <div className="flex flex-col gap-5">
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
-                  <h3 className="text-sm font-black text-[#0F172A]">National Pension Scheme (NPS)</h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Tax-deductible retirement accounts with professional equity allocation plans.</p>
-                </div>
-
-                <div className="bg-white border border-slate-200 p-4 rounded-2xl">
-                  <span className="text-xs font-black text-slate-800 block">NPS Tax Deductions</span>
-                  <p className="text-[10.5px] text-slate-500 mt-1 leading-normal">
-                    Claim additional deductions up to ₹50,000 under section 80CCD(1B) beyond standard 80C caps.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* RESEARCH HUB */}
-            {activeCategory === 'research' && (
-              <div className="flex flex-col gap-5">
-                <div className="bg-gradient-to-tr from-blue-50 to-indigo-50 border border-blue-200/50 rounded-2xl p-4">
-                  <h3 className="text-sm font-black text-[#0F172A]">Institutional Research Center</h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Download SEBI compliance documents, technical reviews, and quarterly corporate updates.</p>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  {['Q1 Corporate Earnings Meta Review.pdf', 'Sector Rotation under High Inflation Regimes.pdf'].map(doc => (
-                    <div key={doc} className="bg-white border border-slate-200 p-3 rounded-2xl flex justify-between items-center">
-                      <span className="text-xs font-black text-slate-800">{doc}</span>
-                      <button className="p-2 hover:bg-slate-100 rounded-xl text-blue-600 transition-colors">
-                        <Download className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* MORE PRODUCTS */}
-            {activeCategory === 'more' && (
-              <div className="flex flex-col gap-5">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">More Opportunities (Coming Soon)</span>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {['US Equities', 'Smallcase Baskets', 'Term Insurance', 'Portfolio Management Services (PMS)', 'Alternative Funds (AIF)'].map(p => (
-                    <div key={p} className="bg-white border border-dashed border-slate-200 p-4 rounded-2xl">
-                      <span className="text-xs font-black text-slate-400 block">{p}</span>
-                      <span className="text-[9px] text-blue-600 font-bold block mt-1">Integration Pending</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
+          <div className="flex items-center gap-2 bg-white border border-[#E2E8F0] px-3.5 py-2 rounded-2xl text-xs font-bold text-slate-700 shadow-xs">
+            <ArrowUpDown className="w-4 h-4 text-slate-400" />
+            <span>Sort:</span>
+            <select 
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="bg-transparent font-black text-[#0F172A] outline-none cursor-pointer"
+            >
+              <option>Popularity</option>
+              <option>Highest Return</option>
+              <option>Lowest Risk</option>
+              <option>Newest</option>
+            </select>
+          </div>
+        </div>
       </div>
+
+      {/* 1. HERO MESH GRADIENT BANNER */}
+      <section className="bg-[#0F172A] text-white rounded-[28px] p-8 relative overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl -translate-y-1/3 translate-x-1/3 pointer-events-none" />
+        <div className="absolute left-10 bottom-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 items-center">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-4 h-4 text-blue-400" />
+              <span className="text-xs font-black text-blue-400 uppercase tracking-wider">INVESTMENT MARKETPLACE</span>
+            </div>
+
+            <h2 className="text-3xl sm:text-4xl font-black mb-3 leading-tight">
+              Good Morning. Ready to invest today?
+            </h2>
+
+            <p className="text-sm text-slate-300 font-medium leading-relaxed max-w-xl mb-6">
+              Browse curated stocks, high-yield mutual funds, ETFs, open IPOs, and digital gold. Backed by quantitative AI screening and SEBI compliance.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-4">
+              <button 
+                onClick={() => setSelectedCategory('stocks')}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-black px-6 py-3.5 rounded-xl transition shadow-lg flex items-center gap-2 text-sm"
+              >
+                Explore Opportunities <ArrowRight className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => {
+                  if (onTrade) onTrade(featuredOpportunities[0]);
+                }}
+                className="bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-3.5 rounded-xl border border-white/20 transition text-sm flex items-center gap-2"
+              >
+                Start Investing
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Metrics Overlay Widget */}
+          <div className="bg-white/5 border border-white/10 rounded-[24px] p-6 backdrop-blur-md flex flex-col gap-4">
+            <span className="text-xs font-black uppercase text-blue-400 tracking-wider">Market Intelligence Snapshot</span>
+            
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="bg-white/5 p-3 rounded-xl border border-white/10">
+                <span className="text-slate-400 text-[10px] font-bold block uppercase">Market Mood</span>
+                <span className="text-base font-black text-emerald-400 mt-0.5 block">Bullish</span>
+              </div>
+              <div className="bg-white/5 p-3 rounded-xl border border-white/10">
+                <span className="text-slate-400 text-[10px] font-bold block uppercase">AI Setups</span>
+                <span className="text-base font-black text-blue-300 mt-0.5 block">14 Available</span>
+              </div>
+              <div className="bg-white/5 p-3 rounded-xl border border-white/10">
+                <span className="text-slate-400 text-[10px] font-bold block uppercase">Open IPOs</span>
+                <span className="text-base font-black text-amber-400 mt-0.5 block">4 Subscriptions</span>
+              </div>
+              <div className="bg-white/5 p-3 rounded-xl border border-white/10">
+                <span className="text-slate-400 text-[10px] font-bold block uppercase">Gold Yield</span>
+                <span className="text-base font-black text-white mt-0.5 block">2.5% + Capital</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. INVESTMENT CATEGORIES (MINIMALIST COMPACT SMOOTH SLIDER) */}
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-black text-[#0F172A]">Browse Asset Classes</h3>
+            <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">9 Categories</span>
+          </div>
+
+          {/* Smooth Scroll Navigation Controls */}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => handleScroll('left')}
+              className="w-8 h-8 rounded-xl bg-white border border-[#E2E8F0] text-slate-600 hover:text-blue-600 hover:border-blue-300 flex items-center justify-center transition shadow-xs active:scale-95 cursor-pointer"
+              title="Scroll Left"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => handleScroll('right')}
+              className="w-8 h-8 rounded-xl bg-white border border-[#E2E8F0] text-slate-600 hover:text-blue-600 hover:border-blue-300 flex items-center justify-center transition shadow-xs active:scale-95 cursor-pointer"
+              title="Scroll Right"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Minimalist Compact Horizontal Scroll Bar */}
+        <div
+          ref={scrollContainerRef}
+          className="flex items-center gap-2.5 overflow-x-auto pb-2 scroll-smooth scrollbar-none no-scrollbar select-none"
+        >
+          {categoriesList.map((cat) => {
+            const isActive = selectedCategory === cat.id;
+            return (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`shrink-0 flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-black transition-all border shadow-xs cursor-pointer ${
+                  isActive
+                    ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-md ring-2 ring-blue-600/20'
+                    : 'bg-white text-[#0F172A] border-[#E2E8F0] hover:border-blue-300 hover:bg-slate-50'
+                }`}
+              >
+                <span className={`p-1 rounded-lg ${isActive ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                  {cat.icon}
+                </span>
+                <span className="whitespace-nowrap">{cat.name}</span>
+                <span
+                  className={`text-[9px] font-extrabold px-2 py-0.5 rounded-md whitespace-nowrap ${
+                    isActive ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'
+                  }`}
+                >
+                  {cat.count}
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 3. FEATURED INVESTMENT OPPORTUNITIES (EDITORIAL CARDS) */}
+      <section className="flex flex-col gap-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-black text-[#0F172A]">Featured Opportunities</h3>
+            <p className="text-xs text-slate-500 font-medium">Curated high-potential investment products.</p>
+          </div>
+          <button onClick={() => setSelectedCategory('all')} className="text-blue-600 font-bold text-xs hover:underline">
+            View All Marketplace Items
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {featuredOpportunities.map((op) => (
+            <div 
+              key={op.id}
+              onClick={() => {
+                if (onSelectStock) onSelectStock(op);
+              }}
+              className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 shadow-sm hover:shadow-md transition group flex flex-col justify-between cursor-pointer hover:border-blue-300"
+            >
+              <div>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-[#0F172A] text-white flex items-center justify-center font-black text-xs shrink-0 shadow-sm">
+                      {op.logo}
+                    </div>
+                    <div>
+                      <h4 className="font-black text-[#0F172A] text-base group-hover:text-blue-600 transition leading-tight">
+                        {op.name}
+                      </h4>
+                      <span className="text-xs font-bold text-slate-400">{op.category} · {op.symbol}</span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-black bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg border border-blue-100">
+                    {op.aiBadge}
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-600 font-medium leading-relaxed mb-5 line-clamp-2">
+                  {op.desc}
+                </p>
+
+                <div className="grid grid-cols-2 gap-3 p-3.5 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] mb-5">
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Price / NAV</span>
+                    <span className="font-black text-[#0F172A] text-sm">{op.price}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Expected Returns</span>
+                    <span className="font-black text-emerald-600 text-sm">{op.returnRange}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2 border-t border-slate-100">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleBookmark(op.id, op.name);
+                  }}
+                  className={`w-10 h-10 rounded-xl border border-[#E2E8F0] flex items-center justify-center transition ${
+                    bookmarkedItems[op.id] ? 'bg-blue-50 text-blue-600 border-blue-200' : 'text-slate-400 hover:bg-slate-50'
+                  }`}
+                >
+                  <Bookmark className="w-4 h-4" fill={bookmarkedItems[op.id] ? '#2563EB' : 'none'} />
+                </button>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onSelectResearch) onSelectResearch(op);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl border border-[#E2E8F0] text-slate-700 font-bold text-xs hover:bg-slate-50 transition"
+                >
+                  Research
+                </button>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onTrade) onTrade(op);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs transition shadow-sm"
+                >
+                  Invest
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 4. TRENDING INVESTMENTS SECTIONS */}
+      <section className="flex flex-col gap-6">
+        <h3 className="text-xl font-black text-[#0F172A]">Trending Investment Products</h3>
+
+        {/* Trending Stocks */}
+        <div className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 shadow-sm flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black text-[#0F172A] uppercase tracking-wider flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-blue-600" /> Trending Stocks
+            </span>
+            <button onClick={() => setSelectedCategory('stocks')} className="text-xs font-bold text-blue-600 hover:underline">View All Stocks</button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {trendingStocks.map((st) => (
+              <div 
+                key={st.symbol}
+                onClick={() => { if (onSelectStock) onSelectStock(st); }}
+                className="p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl flex justify-between items-center hover:border-blue-400 transition cursor-pointer group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-xs shrink-0">
+                    {st.logo}
+                  </div>
+                  <div>
+                    <h5 className="font-black text-xs text-[#0F172A] group-hover:text-blue-600 transition">{st.name}</h5>
+                    <span className="text-[10px] font-bold text-slate-400">{st.symbol} · {st.risk}</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="font-black text-xs text-[#0F172A] block">{st.price}</span>
+                  <span className="text-[10px] font-extrabold text-emerald-600">{st.change}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Trending Mutual Funds & IPOs Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          {/* Mutual Funds */}
+          <div className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 shadow-sm flex flex-col gap-4">
+            <span className="text-xs font-black text-[#0F172A] uppercase tracking-wider flex items-center gap-2">
+              <Wallet className="w-4 h-4 text-emerald-600" /> Top Mutual Funds & SIPs
+            </span>
+            <div className="flex flex-col gap-3">
+              {trendingFunds.map((mf) => (
+                <div key={mf.symbol} className="p-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl flex justify-between items-center">
+                  <div>
+                    <h5 className="font-black text-xs text-[#0F172A]">{mf.name}</h5>
+                    <span className="text-[10px] text-slate-400 font-bold">{mf.price} · {mf.risk} Risk</span>
+                  </div>
+                  <span className="text-xs font-black text-emerald-600">{mf.change}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Gold & IPOs */}
+          <div className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 shadow-sm flex flex-col gap-4">
+            <span className="text-xs font-black text-[#0F172A] uppercase tracking-wider flex items-center gap-2">
+              <Gem className="w-4 h-4 text-amber-500" /> Sovereign Gold & Open IPOs
+            </span>
+            <div className="flex flex-col gap-3">
+              {trendingGold.map((g) => (
+                <div key={g.symbol} className="p-3.5 bg-amber-50/50 border border-amber-100 rounded-2xl flex justify-between items-center">
+                  <div>
+                    <h5 className="font-black text-xs text-amber-950">{g.name}</h5>
+                    <span className="text-[10px] text-amber-700 font-bold">{g.price} · {g.status}</span>
+                  </div>
+                  <span className="text-xs font-black text-amber-800">{g.change}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 5. CURATED COLLECTIONS */}
+      <section className="flex flex-col gap-4">
+        <h3 className="text-xl font-black text-[#0F172A]">Curated Investment Collections</h3>
+        
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          {collections.map((col) => (
+            <button
+              key={col.id}
+              onClick={() => setActiveCollection(col.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-black transition shrink-0 ${
+                activeCollection === col.id
+                  ? 'bg-[#0F172A] text-white shadow-sm'
+                  : 'bg-white border border-[#E2E8F0] text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              {col.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* 6. AI RECOMMENDATIONS ("RECOMMENDED FOR YOU") */}
+      <section className="bg-white rounded-[28px] border border-blue-100 p-6 sm:p-8 shadow-sm flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-blue-600 font-black text-base">
+            <Sparkles className="w-5 h-5 fill-blue-600" /> Recommended For You (AI Match)
+          </div>
+          <span className="text-[10px] font-bold text-slate-400">Based on Risk Profile & Portfolio</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {aiRecommendations.map((ai) => (
+            <div key={ai.symbol} className="p-6 bg-[#F8FAFC] border border-[#E2E8F0] rounded-[24px] flex flex-col justify-between gap-4">
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-black text-[#0F172A] text-base">{ai.title}</h4>
+                  <span className="text-xs font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">
+                    {ai.confidence}% Confidence
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 font-medium leading-relaxed mb-4">
+                  {ai.reason}
+                </p>
+                <div className="flex gap-4 text-xs font-bold text-slate-400">
+                  <span>Horizon: <strong className="text-[#0F172A]">{ai.horizon}</strong></span>
+                  <span>Risk: <strong className="text-[#0F172A]">{ai.risk}</strong></span>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-3 border-t border-slate-200">
+                <button
+                  onClick={() => {
+                    if (onSelectResearch) onSelectResearch(ai);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl border border-[#E2E8F0] text-slate-700 font-bold text-xs hover:bg-white transition"
+                >
+                  Research
+                </button>
+                <button
+                  onClick={() => {
+                    if (onTrade) onTrade(ai);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs transition shadow-sm"
+                >
+                  Invest Now
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 7. INTERACTIVE INVESTMENT TOOLS */}
+      <section className="flex flex-col gap-5">
+        <h3 className="text-xl font-black text-[#0F172A]">Interactive Investment Tools</h3>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            { id: 'sip', title: 'SIP Calculator', desc: 'Calculate wealth gain over time' },
+            { id: 'lumpsum', title: 'Lumpsum Return', desc: 'Single deposit growth tool' },
+            { id: 'goal', title: 'Goal Planner', desc: 'Retirement & house targets' },
+            { id: 'tax', title: 'Tax Estimator', desc: '80C & SGB tax savings' }
+          ].map((tool) => (
+            <div
+              key={tool.id}
+              onClick={() => setActiveToolModal(tool.id)}
+              className="bg-white rounded-[24px] border border-[#E2E8F0] p-5 shadow-sm hover:shadow-md transition cursor-pointer group hover:border-blue-300 flex flex-col justify-between"
+            >
+              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <Calculator className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-black text-sm text-[#0F172A] group-hover:text-blue-600 transition mb-1">{tool.title}</h4>
+                <p className="text-[10px] text-slate-400 font-medium">{tool.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 8. EXPLORE MORE / COMING SOON */}
+      <section className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 shadow-sm flex flex-col gap-4">
+        <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Future Products (Coming Soon)</span>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            { name: 'US Equities', tag: 'Global Tech' },
+            { name: 'Term Insurance', tag: 'Life Cover' },
+            { name: 'Smallcase Baskets', tag: 'Thematic' },
+            { name: 'Real Estate Funds', tag: 'REITs' }
+          ].map((item) => (
+            <div key={item.name} className="p-4 bg-[#F8FAFC] border border-dashed border-slate-200 rounded-2xl opacity-75">
+              <span className="font-black text-xs text-[#0F172A] block">{item.name}</span>
+              <span className="text-[9px] font-bold text-blue-600 block mt-1">Coming Soon</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SIP INTERACTIVE CALCULATOR MODAL */}
+      {activeToolModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-[28px] border border-[#E2E8F0] p-6 sm:p-8 max-w-lg w-full shadow-2xl flex flex-col gap-6"
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-2">
+                <Calculator className="w-5 h-5 text-blue-600" />
+                <h3 className="font-black text-lg text-[#0F172A]">SIP Wealth Calculator</h3>
+              </div>
+              <button onClick={() => setActiveToolModal(null)} className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-5 text-xs">
+              <div>
+                <div className="flex justify-between font-bold mb-1">
+                  <span className="text-slate-400">Monthly SIP Amount</span>
+                  <span className="font-black text-[#0F172A]">₹{sipMonthly.toLocaleString('en-IN')}</span>
+                </div>
+                <input
+                  type="range"
+                  min="500"
+                  max="100000"
+                  step="500"
+                  value={sipMonthly}
+                  onChange={(e) => setSipMonthly(Number(e.target.value))}
+                  className="w-full accent-blue-600"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between font-bold mb-1">
+                  <span className="text-slate-400">Investment Horizon</span>
+                  <span className="font-black text-[#0F172A]">{sipYears} Years</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="30"
+                  value={sipYears}
+                  onChange={(e) => setSipYears(Number(e.target.value))}
+                  className="w-full accent-blue-600"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between font-bold mb-1">
+                  <span className="text-slate-400">Expected Annual Return</span>
+                  <span className="font-black text-emerald-600">{sipReturnRate}% p.a.</span>
+                </div>
+                <input
+                  type="range"
+                  min="5"
+                  max="25"
+                  value={sipReturnRate}
+                  onChange={(e) => setSipReturnRate(Number(e.target.value))}
+                  className="w-full accent-blue-600"
+                />
+              </div>
+
+              <div className="p-5 bg-[#0F172A] text-white rounded-2xl grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Invested</span>
+                  <span className="text-base font-black">₹{investedVal.toLocaleString('en-IN')}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Est. Total Wealth</span>
+                  <span className="text-xl font-black text-emerald-400">₹{estMaturity.toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setActiveToolModal(null)}
+              className="w-full py-3.5 rounded-xl bg-blue-600 text-white font-black text-xs hover:bg-blue-700 transition"
+            >
+              Done & Explore SIP Mutual Funds
+            </button>
+          </motion.div>
+        </div>
+      )}
 
     </div>
   );
