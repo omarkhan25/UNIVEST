@@ -20,6 +20,7 @@ import { ResearchDetail } from '../components/dashboard/ResearchDetail';
 import { ReportViewer } from '../components/dashboard/ReportViewer';
 import { AnalystProfileModal } from '../components/dashboard/AnalystProfileModal';
 import { TradeDrawer } from '../components/dashboard/TradeDrawer';
+import { AiCopilotModal } from '../components/ai/AiCopilotModal';
 import { MarketIntelligenceCenter } from '../components/dashboard/MarketIntelligenceCenter';
 import { LiveMarketStatusWidget } from '../components/dashboard/LiveMarketStatusWidget';
 import { Newspaper } from 'lucide-react';
@@ -487,107 +488,14 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         <Sparkles className="w-6 h-6 animate-pulse" />
       </motion.button>
 
-      {/* GLOBAL SLIDE-IN AI CHAT DRAWER PANEL */}
-      <AnimatePresence>
-        {aiOpen && (
-          <div className="fixed inset-0 z-50 flex justify-end">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setAiOpen(false)}
-              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="relative w-full max-w-sm bg-white border-l border-brand-border h-full flex flex-col shadow-premium-xl z-10"
-            >
-              {/* Header */}
-              <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                    <BrainCircuit className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-brand-navy">Univest AI Advisor</h3>
-                    <span className="text-[10px] text-success font-semibold flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-success animate-ping" /> Online
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setAiOpen(false)}
-                  className="p-1.5 hover:bg-slate-100 rounded-full text-brand-secondary transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Chat Message Logs */}
-              <div className="flex-1 p-5 overflow-y-auto flex flex-col gap-4">
-                {chatMessages.map((msg, idx) => {
-                  const isUser = idx % 2 !== 0;
-                  return (
-                    <div
-                      key={idx}
-                      className={`flex flex-col max-w-[85%] text-xs p-3.5 rounded-card leading-relaxed ${
-                        isUser
-                          ? 'bg-primary text-white self-end shadow-premium-sm'
-                          : 'bg-slate-50 border border-brand-border text-brand-navy self-start'
-                      }`}
-                    >
-                      {msg}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Quick Prompt Chips */}
-              <div className="p-4 border-t border-slate-100 flex flex-col gap-2.5">
-                <span className="text-[9px] text-brand-secondary font-bold uppercase tracking-wider px-1">Quick Action Prompts</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {['Analyze Reliance', 'Compare TCS vs INFY', 'Explain RSI', 'Review My Portfolio'].map((prompt) => (
-                    <button
-                      key={prompt}
-                      onClick={() => handleSendPrompt(prompt)}
-                      className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 hover:border-primary hover:text-primary transition-colors rounded-full text-[10px] font-semibold text-brand-secondary"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Input Area */}
-              <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="Ask AI Assistant..."
-                  value={inputVal}
-                  onChange={(e) => setInputVal(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSendPrompt(inputVal)}
-                  className="flex-1 bg-white border border-brand-border rounded-input px-3.5 py-2.5 text-xs text-brand-navy focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-slate-400"
-                />
-                <button
-                  onClick={() => handleSendPrompt(inputVal)}
-                  className="p-2.5 rounded-full bg-primary text-white hover:bg-brand-blue shadow-premium-sm transition-all focus:outline-none"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Compliance advisory warning */}
-              <div className="p-3 bg-slate-100/60 border-t border-slate-200 flex items-start gap-1.5 text-[9px] text-brand-secondary leading-normal select-none">
-                <ShieldAlert className="w-3.5 h-3.5 text-primary shrink-0" />
-                <span>AI advisory suggestions do not constitute a direct transaction offer. Double-check options target risks.</span>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* AI INVESTMENT COPILOT MODAL & WORKSPACE */}
+      <AiCopilotModal
+        isOpen={aiOpen}
+        onClose={() => setAiOpen(false)}
+        onSelectStock={(st) => setSelectedStock(st)}
+        onSelectResearch={(res) => setSelectedResearch(res)}
+        onTrade={(tr) => setTradeIntent(tr)}
+      />
 
       {/* PREMIUM RIGHT SLIDE-OVER WORKSPACE DRAWER PANEL */}
       <AnimatePresence>
