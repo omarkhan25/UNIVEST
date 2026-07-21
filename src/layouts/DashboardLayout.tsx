@@ -19,8 +19,8 @@ import { StockDetail } from '../components/dashboard/StockDetail';
 import { ResearchDetail } from '../components/dashboard/ResearchDetail';
 import { ReportViewer } from '../components/dashboard/ReportViewer';
 import { AnalystProfileModal } from '../components/dashboard/AnalystProfileModal';
+import { CompareModal } from '../components/dashboard/CompareModal';
 import { TradeDrawer } from '../components/dashboard/TradeDrawer';
-import { WatchlistManagerModal } from '../components/dashboard/WatchlistManagerModal';
 import { NotificationCenterModal } from '../components/dashboard/NotificationCenterModal';
 import { NewsDetail } from '../components/dashboard/NewsDetail';
 import { AiCopilotModal } from '../components/ai/AiCopilotModal';
@@ -121,7 +121,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   const [selectedNews, setSelectedNews] = useState<any | null>(null);
   const [tradeIntent, setTradeIntent] = useState<any | null>(null);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [isWatchlistManagerOpen, setIsWatchlistManagerOpen] = useState(false);
+  const [isCompareOpen, setIsCompareOpen] = useState(false);
   
   // Custom Watchlists state
   const [customWatchlists, setCustomWatchlists] = useState<CustomWatchlist[]>([
@@ -398,13 +398,13 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
             {/* Live Market Status Widget */}
             <LiveMarketStatusWidget />
 
-            {/* Desktop Premium Watchlist Command Center trigger */}
+            {/* Desktop Premium Workspace trigger */}
             <button 
-              onClick={() => setIsWatchlistManagerOpen(true)}
+              onClick={() => setWorkspaceOpen(true)}
               className="flex items-center gap-1.5 px-3.5 h-10 rounded-full border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50 hover:border-blue-200 transition-colors shadow-2xs cursor-pointer"
             >
-              <Bookmark className="w-4 h-4 text-blue-600" />
-              <span className="text-xs font-black">Watchlists</span>
+              <Bookmark className="w-4 h-4 text-slate-500" />
+              <span className="text-xs font-black">Workspace</span>
             </button>
 
             {/* Notifications Bell */}
@@ -512,15 +512,6 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         onSelectResearch={(res) => setSelectedResearch(res)}
         onTrade={(tr) => setTradeIntent(tr)}
         onSelectNews={(nw) => setSelectedNews(nw)}
-      />
-
-      {/* MULTI-WATCHLIST COMMAND CENTER MODAL */}
-      <WatchlistManagerModal
-        isOpen={isWatchlistManagerOpen}
-        onClose={() => setIsWatchlistManagerOpen(false)}
-        onSelectStock={(st) => setSelectedStock(st)}
-        onSelectResearch={(res) => setSelectedResearch(res)}
-        onTrade={(tr) => setTradeIntent(tr)}
       />
 
       {/* NEWS DETAIL MODAL */}
@@ -1051,6 +1042,14 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         isOpen={!!tradeIntent}
         onClose={() => setTradeIntent(null)}
         research={tradeIntent}
+      />
+
+      <CompareModal
+        isOpen={isCompareOpen}
+        onClose={() => setIsCompareOpen(false)}
+        onSelectStock={(st) => setSelectedStock(st)}
+        onSelectResearch={(res) => setSelectedResearch(res)}
+        onTrade={(tr) => setTradeIntent(tr)}
       />
 
     </div>
