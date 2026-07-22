@@ -1,7 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
-  User, Briefcase, Bookmark, Settings, HelpCircle, Sparkles, 
-  RefreshCcw, LogOut, ShieldCheck, ChevronRight, Wallet, ArrowUpRight 
+  Wallet, RefreshCcw, LogOut, ArrowUpRight, Plus, ShieldCheck, UserCheck, KeyRound
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -9,17 +9,52 @@ import toast from 'react-hot-toast';
 interface UserMenuDropdownProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigateTab: (tabName: string) => void;
-  onOpenWorkspace: () => void;
+  onNavigateTab?: (tabName: string) => void;
+  onOpenWorkspace?: () => void;
+  onAddFunds?: () => void;
+  onSwitchAccount?: () => void;
+  onLogout?: () => void;
 }
 
 export const UserMenuDropdown: React.FC<UserMenuDropdownProps> = ({
   isOpen,
   onClose,
   onNavigateTab,
-  onOpenWorkspace
+  onAddFunds,
+  onSwitchAccount,
+  onLogout
 }) => {
+  const navigate = useNavigate();
+
   if (!isOpen) return null;
+
+  const handleAddFunds = () => {
+    onClose();
+    if (onAddFunds) {
+      onAddFunds();
+    } else {
+      toast.success('Add Funds modal opened');
+    }
+  };
+
+  const handleSwitchAccount = () => {
+    onClose();
+    if (onSwitchAccount) {
+      onSwitchAccount();
+    } else {
+      navigate('/login');
+    }
+  };
+
+  const handleLogout = () => {
+    onClose();
+    if (onLogout) {
+      onLogout();
+    } else {
+      toast.success('Logged out successfully');
+      navigate('/login');
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -32,161 +67,101 @@ export const UserMenuDropdown: React.FC<UserMenuDropdownProps> = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -10, scale: 0.96 }}
           transition={{ duration: 0.18, ease: "easeOut" }}
-          className="absolute right-6 top-[72px] w-[300px] bg-white border border-[#E2E8F0] rounded-[24px] shadow-2xl z-50 overflow-hidden font-sans text-slate-800 pointer-events-auto flex flex-col"
+          className="absolute right-6 top-[72px] w-[280px] bg-white border border-[#E2E8F0] rounded-[24px] shadow-2xl z-50 overflow-hidden font-sans text-slate-800 pointer-events-auto flex flex-col p-3.5 gap-3"
         >
-          {/* USER HEADER */}
-          <div className="p-4 border-b border-slate-100 bg-[#F8FAFC] flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-xs flex items-center justify-center shadow-sm">
-                OK
-              </div>
-              <div>
-                <h4 className="font-black text-sm text-[#0F172A] leading-tight">Omar Khan</h4>
-                <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3 text-emerald-600" /> Verified Investor
-                </span>
-              </div>
+          {/* 1. TOTAL NET WEALTH SNAPSHOT CARD */}
+          <div className="bg-[#0F172A] text-white rounded-2xl p-4 flex flex-col gap-2 shadow-md relative overflow-hidden">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <Wallet className="w-3.5 h-3.5 text-blue-400" /> Total Net Wealth
+              </span>
+              <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded">
+                +20.3%
+              </span>
             </div>
-            <span className="text-[9px] font-black bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200 uppercase">
-              PRO
-            </span>
-          </div>
-
-          {/* NET WEALTH SNAPSHOT CARD */}
-          <div className="p-4 border-b border-slate-100 bg-white">
-            <div className="bg-[#0F172A] text-white rounded-2xl p-4 flex flex-col gap-2 shadow-md relative overflow-hidden">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                  <Wallet className="w-3 h-3 text-blue-400" /> Total Net Wealth
-                </span>
-                <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded">
-                  +20.3%
-                </span>
-              </div>
-              <span className="text-xl font-black tracking-tight">₹8,42,150.00</span>
-              <div className="flex items-center justify-between text-[10px] text-slate-300 font-bold pt-1 border-t border-white/10">
-                <span>Demat: IN303028130</span>
-                <button
-                  onClick={() => {
-                    onClose();
-                    onNavigateTab('Portfolio');
-                  }}
-                  className="text-blue-400 hover:underline font-black flex items-center gap-0.5"
-                >
-                  View <ArrowUpRight className="w-3 h-3" />
-                </button>
-              </div>
+            <span className="text-2xl font-black tracking-tight">₹8,42,150.00</span>
+            <div className="flex items-center justify-between text-[10px] text-slate-300 font-bold pt-2 border-t border-white/10 mt-1">
+              <span>Demat: IN303028130</span>
+              <button
+                onClick={() => {
+                  onClose();
+                  if (onNavigateTab) onNavigateTab('Portfolio');
+                }}
+                className="text-blue-400 hover:text-blue-300 transition font-black flex items-center gap-0.5 cursor-pointer"
+              >
+                View <ArrowUpRight className="w-3 h-3" />
+              </button>
             </div>
           </div>
 
-          {/* NAVIGATION LINKS */}
-          <div className="p-2 flex flex-col gap-0.5 text-xs font-bold">
+          {/* 2. ADD FUNDS BUTTON */}
+          <button
+            onClick={handleAddFunds}
+            className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-black text-xs transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>Add Funds</span>
+          </button>
+
+          {/* MENU ACTIONS */}
+          <div className="flex flex-col gap-0.5 border-t border-slate-100 pt-2">
+            {/* KYC Onboarding */}
             <button
               onClick={() => {
                 onClose();
-                onNavigateTab('Profile');
+                navigate('/onboarding');
               }}
-              className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-100 text-[#0F172A] transition flex items-center justify-between"
+              className="w-full px-3 py-2 rounded-xl hover:bg-emerald-50 text-emerald-700 font-bold text-xs transition flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-2.5">
-                <User className="w-4 h-4 text-blue-600" />
-                <span>My Profile</span>
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>KYC & Document Onboarding</span>
               </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
             </button>
 
+            {/* Login Screen */}
             <button
               onClick={() => {
                 onClose();
-                onNavigateTab('Portfolio');
+                navigate('/login');
               }}
-              className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-100 text-[#0F172A] transition flex items-center justify-between"
+              className="w-full px-3 py-2 rounded-xl hover:bg-blue-50 text-blue-600 font-bold text-xs transition flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-2.5">
-                <Briefcase className="w-4 h-4 text-slate-600" />
-                <span>Portfolio</span>
+                <KeyRound className="w-4 h-4 text-blue-500" />
+                <span>Sign In / Login</span>
               </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
             </button>
 
+            {/* Create Account */}
             <button
               onClick={() => {
                 onClose();
-                onOpenWorkspace();
+                navigate('/signup');
               }}
-              className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-100 text-[#0F172A] transition flex items-center justify-between"
+              className="w-full px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-700 font-bold text-xs transition flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-2.5">
-                <Bookmark className="w-4 h-4 text-slate-600" />
-                <span>Workspace</span>
+                <UserCheck className="w-4 h-4 text-slate-500" />
+                <span>Register New Account</span>
               </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
             </button>
 
+            {/* 3. SWITCH ACCOUNTS */}
             <button
-              onClick={() => {
-                onClose();
-                onNavigateTab('Settings');
-              }}
-              className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-100 text-[#0F172A] transition flex items-center justify-between"
-            >
-              <div className="flex items-center gap-2.5">
-                <Settings className="w-4 h-4 text-slate-600" />
-                <span>Settings</span>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-
-            <button
-              onClick={() => {
-                onClose();
-                onNavigateTab('Settings');
-              }}
-              className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-100 text-[#0F172A] transition flex items-center justify-between"
-            >
-              <div className="flex items-center gap-2.5">
-                <HelpCircle className="w-4 h-4 text-slate-600" />
-                <span>Help & Support</span>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-
-            <button
-              onClick={() => {
-                onClose();
-                toast.success('Univest Pro Plan is active! Renewal: July 2027');
-              }}
-              className="w-full px-3 py-2.5 rounded-xl hover:bg-blue-50 text-blue-700 transition flex items-center justify-between"
-            >
-              <div className="flex items-center gap-2.5">
-                <Sparkles className="w-4 h-4 text-blue-600 fill-blue-600" />
-                <span>Univest Premium</span>
-              </div>
-              <span className="text-[10px] font-black uppercase text-blue-600 bg-blue-100 px-2 py-0.5 rounded">Active</span>
-            </button>
-
-            <button
-              onClick={() => {
-                onClose();
-                toast.success('Switch Account modal active');
-              }}
-              className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-100 text-slate-600 transition flex items-center justify-between"
+              onClick={handleSwitchAccount}
+              className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-100 text-[#0F172A] font-bold text-xs transition flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-2.5">
                 <RefreshCcw className="w-4 h-4 text-slate-500" />
-                <span>Switch Account</span>
+                <span>Switch Accounts</span>
               </div>
             </button>
-          </div>
 
-          {/* FOOTER LOGOUT */}
-          <div className="p-2 border-t border-slate-100 bg-[#F8FAFC]">
+            {/* 4. LOGOUT */}
             <button
-              onClick={() => {
-                onClose();
-                toast.success('Logged out successfully');
-              }}
-              className="w-full px-3 py-2.5 rounded-xl hover:bg-rose-50 text-rose-600 font-black text-xs transition flex items-center gap-2.5"
+              onClick={handleLogout}
+              className="w-full px-3 py-2.5 rounded-xl hover:bg-rose-50 text-rose-600 font-black text-xs transition flex items-center gap-2.5 cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>

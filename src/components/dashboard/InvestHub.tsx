@@ -8,6 +8,13 @@ import {
   X, Filter, Compass, Plus, ExternalLink, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { AllProductsTab } from '../invest/AllProductsTab';
+import { StocksTab } from '../invest/StocksTab';
+import { MutualFundsTab } from '../invest/MutualFundsTab';
+import { ETFsTab } from '../invest/ETFsTab';
+import { IPOsTab } from '../invest/IPOsTab';
+import { GoldTab } from '../invest/GoldTab';
+import { CommoditiesTab } from '../invest/CommoditiesTab';
 
 export interface InvestHubProps {
   activeCategory?: string;
@@ -336,178 +343,31 @@ export const InvestHub: React.FC<InvestHubProps> = ({
         </div>
       </section>
 
-      {/* 3. FEATURED INVESTMENT OPPORTUNITIES (EDITORIAL CARDS) */}
-      <section className="flex flex-col gap-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-black text-[#0F172A]">Featured Opportunities</h3>
-            <p className="text-xs text-slate-500 font-medium">Curated high-potential investment products.</p>
-          </div>
-          <button onClick={() => setSelectedCategory('all')} className="text-blue-600 font-bold text-xs hover:underline">
-            View All Marketplace Items
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {featuredOpportunities.map((op) => (
-            <div 
-              key={op.id}
-              onClick={() => {
-                if (onSelectStock) onSelectStock(op);
-              }}
-              className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 shadow-sm hover:shadow-md transition group flex flex-col justify-between cursor-pointer hover:border-blue-300"
-            >
-              <div>
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-[#0F172A] text-white flex items-center justify-center font-black text-xs shrink-0 shadow-sm">
-                      {op.logo}
-                    </div>
-                    <div>
-                      <h4 className="font-black text-[#0F172A] text-base group-hover:text-blue-600 transition leading-tight">
-                        {op.name}
-                      </h4>
-                      <span className="text-xs font-bold text-slate-400">{op.category} · {op.symbol}</span>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-black bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg border border-blue-100">
-                    {op.aiBadge}
-                  </span>
-                </div>
-
-                <p className="text-xs text-slate-600 font-medium leading-relaxed mb-5 line-clamp-2">
-                  {op.desc}
-                </p>
-
-                <div className="grid grid-cols-2 gap-3 p-3.5 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] mb-5">
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Price / NAV</span>
-                    <span className="font-black text-[#0F172A] text-sm">{op.price}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Expected Returns</span>
-                    <span className="font-black text-emerald-600 text-sm">{op.returnRange}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-2 border-t border-slate-100">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleBookmark(op.id, op.name);
-                  }}
-                  className={`w-10 h-10 rounded-xl border border-[#E2E8F0] flex items-center justify-center transition ${
-                    bookmarkedItems[op.id] ? 'bg-blue-50 text-blue-600 border-blue-200' : 'text-slate-400 hover:bg-slate-50'
-                  }`}
-                >
-                  <Bookmark className="w-4 h-4" fill={bookmarkedItems[op.id] ? '#2563EB' : 'none'} />
-                </button>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onSelectResearch) onSelectResearch(op);
-                  }}
-                  className="flex-1 py-2.5 rounded-xl border border-[#E2E8F0] text-slate-700 font-bold text-xs hover:bg-slate-50 transition"
-                >
-                  Research
-                </button>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onTrade) onTrade(op);
-                  }}
-                  className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs transition shadow-sm"
-                >
-                  Invest
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. TRENDING INVESTMENTS SECTIONS */}
-      <section className="flex flex-col gap-6">
-        <h3 className="text-xl font-black text-[#0F172A]">Trending Investment Products</h3>
-
-        {/* Trending Stocks */}
-        <div className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 shadow-sm flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-[#0F172A] uppercase tracking-wider flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-blue-600" /> Trending Stocks
-            </span>
-            <button onClick={() => setSelectedCategory('stocks')} className="text-xs font-bold text-blue-600 hover:underline">View All Stocks</button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {trendingStocks.map((st) => (
-              <div 
-                key={st.symbol}
-                onClick={() => { if (onSelectStock) onSelectStock(st); }}
-                className="p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl flex justify-between items-center hover:border-blue-400 transition cursor-pointer group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-xs shrink-0">
-                    {st.logo}
-                  </div>
-                  <div>
-                    <h5 className="font-black text-xs text-[#0F172A] group-hover:text-blue-600 transition">{st.name}</h5>
-                    <span className="text-[10px] font-bold text-slate-400">{st.symbol} · {st.risk}</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="font-black text-xs text-[#0F172A] block">{st.price}</span>
-                  <span className="text-[10px] font-extrabold text-emerald-600">{st.change}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Trending Mutual Funds & IPOs Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          {/* Mutual Funds */}
-          <div className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 shadow-sm flex flex-col gap-4">
-            <span className="text-xs font-black text-[#0F172A] uppercase tracking-wider flex items-center gap-2">
-              <Wallet className="w-4 h-4 text-emerald-600" /> Top Mutual Funds & SIPs
-            </span>
-            <div className="flex flex-col gap-3">
-              {trendingFunds.map((mf) => (
-                <div key={mf.symbol} className="p-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl flex justify-between items-center">
-                  <div>
-                    <h5 className="font-black text-xs text-[#0F172A]">{mf.name}</h5>
-                    <span className="text-[10px] text-slate-400 font-bold">{mf.price} · {mf.risk} Risk</span>
-                  </div>
-                  <span className="text-xs font-black text-emerald-600">{mf.change}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Gold & IPOs */}
-          <div className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 shadow-sm flex flex-col gap-4">
-            <span className="text-xs font-black text-[#0F172A] uppercase tracking-wider flex items-center gap-2">
-              <Gem className="w-4 h-4 text-amber-500" /> Sovereign Gold & Open IPOs
-            </span>
-            <div className="flex flex-col gap-3">
-              {trendingGold.map((g) => (
-                <div key={g.symbol} className="p-3.5 bg-amber-50/50 border border-amber-100 rounded-2xl flex justify-between items-center">
-                  <div>
-                    <h5 className="font-black text-xs text-amber-950">{g.name}</h5>
-                    <span className="text-[10px] text-amber-700 font-bold">{g.price} · {g.status}</span>
-                  </div>
-                  <span className="text-xs font-black text-amber-800">{g.change}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </div>
-      </section>
+      {/* 3. DYNAMIC ASSET CLASS TAB CONTENT */}
+      <div className="w-full">
+        {(selectedCategory === 'all' || selectedCategory === 'more' || selectedCategory === 'bonds' || selectedCategory === 'nps') && (
+          <AllProductsTab
+            onSelectCategory={(cat) => setSelectedCategory(cat)}
+            onSelectStock={(stk) => onSelectStock && onSelectStock(stk)}
+            onTrade={(tr) => onTrade && onTrade(tr)}
+          />
+        )}
+        {selectedCategory === 'stocks' && (
+          <StocksTab
+            onSelectStock={(stk) => onSelectStock && onSelectStock(stk)}
+            onTrade={(tr) => onTrade && onTrade(tr)}
+          />
+        )}
+        {selectedCategory === 'funds' && <MutualFundsTab />}
+        {selectedCategory === 'etf' && (
+          <ETFsTab onTrade={(etf) => onTrade && onTrade(etf)} />
+        )}
+        {selectedCategory === 'ipo' && <IPOsTab />}
+        {selectedCategory === 'gold' && <GoldTab />}
+        {selectedCategory === 'commodities' && (
+          <CommoditiesTab onTrade={(comm) => onTrade && onTrade(comm)} />
+        )}
+      </div>
 
       {/* 5. CURATED COLLECTIONS */}
       <section className="flex flex-col gap-4">

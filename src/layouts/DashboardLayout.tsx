@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, TrendingUp, Compass, Briefcase, User, 
@@ -28,6 +29,8 @@ import { SettingsCenter } from '../components/dashboard/SettingsCenter';
 import { LearningCenter } from '../components/dashboard/LearningCenter';
 import { MarketIntelligenceCenter } from '../components/dashboard/MarketIntelligenceCenter';
 import { LiveMarketStatusWidget } from '../components/dashboard/LiveMarketStatusWidget';
+import { AddFundsModal } from '../components/dashboard/AddFundsModal';
+import HomeDashboard from '../components/dashboard/HomeDashboard';
 import { Newspaper, GraduationCap, Settings } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 
@@ -106,7 +109,7 @@ interface DrawerStock {
   flash?: 'green' | 'red' | null;
 }
 
-export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('Home');
   const [activeInvestCategory, setActiveInvestCategory] = useState('stocks');
@@ -124,6 +127,9 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   const [tradeIntent, setTradeIntent] = useState<any | null>(null);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const navigate = useNavigate();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
   
   // Custom Watchlists state
   const [customWatchlists, setCustomWatchlists] = useState<CustomWatchlist[]>([
@@ -167,9 +173,6 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Hover item overlay
   const [hoveredStockSymbol, setHoveredStockSymbol] = useState<string | null>(null);
-  
-  // User menu dropdown
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const [chatMessages, setChatMessages] = useState<string[]>([
     'Hello Omar! I am your Univest AI Assistant. How can I help you build wealth today?',
@@ -402,13 +405,20 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
             {/* Live Market Status Widget */}
             <LiveMarketStatusWidget />
 
-            {/* Desktop Premium Workspace trigger */}
-            <button 
-              onClick={() => setWorkspaceOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 h-10 rounded-full border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50 hover:border-blue-200 transition-colors shadow-2xs cursor-pointer"
+            {/* Quick Access Sign In & Onboarding Buttons */}
+            <button
+              onClick={() => navigate('/onboarding')}
+              className="hidden sm:flex items-center gap-1.5 px-3 h-10 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors text-xs font-black cursor-pointer"
             >
-              <Bookmark className="w-4 h-4 text-slate-500" />
-              <span className="text-xs font-black">Workspace</span>
+              <Shield className="w-3.5 h-3.5 text-emerald-600" />
+              <span>KYC Onboarding</span>
+            </button>
+
+            <button
+              onClick={() => navigate('/login')}
+              className="hidden sm:flex items-center gap-1.5 px-3.5 h-10 rounded-full bg-[#0F172A] text-white hover:bg-slate-800 transition-colors text-xs font-black cursor-pointer shadow-2xs"
+            >
+              <span>Sign In</span>
             </button>
 
             {/* Notifications Bell */}
@@ -439,6 +449,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 onClose={() => setIsUserMenuOpen(false)} 
                 onNavigateTab={(tab) => setActiveTab(tab)}
                 onOpenWorkspace={() => setWorkspaceOpen(true)}
+                onAddFunds={() => setIsAddFundsOpen(true)}
               />
             </div>
           </div>
@@ -449,7 +460,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         {/* Primary Page Content Grid Area */}
         <main className="flex-1 w-full p-6 flex flex-col gap-6">
           <div className="flex-1">
-            {activeTab === 'Home' && children}
+            {activeTab === 'Home' && (children || <HomeDashboard />)}
             {activeTab === 'Invest' && (
               <InvestHub 
                 activeCategory={activeInvestCategory}
@@ -474,7 +485,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
               />
             )}
             {activeTab === 'Settings' && <SettingsCenter />}
-            {activeTab === 'Profile' && <ProfileDashboard />}
+            {activeTab === 'Profile' && <ProfileDashboard onAddFunds={() => setIsAddFundsOpen(true)} />}
           </div>
         </main>
       </div>
@@ -1066,6 +1077,11 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         onSelectStock={(st) => setSelectedStock(st)}
         onSelectResearch={(res) => setSelectedResearch(res)}
         onTrade={(tr) => setTradeIntent(tr)}
+      />
+
+      <AddFundsModal
+        isOpen={isAddFundsOpen}
+        onClose={() => setIsAddFundsOpen(false)}
       />
 
     </div>

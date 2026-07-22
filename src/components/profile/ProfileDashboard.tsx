@@ -11,7 +11,11 @@ import { BrokerAccounts } from './BrokerAccounts';
 import { Documents } from './Documents';
 import { ActivityTimeline } from './ActivityTimeline';
 
-export const ProfileDashboard: React.FC = () => {
+interface ProfileDashboardProps {
+  onAddFunds?: () => void;
+}
+
+export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ onAddFunds }) => {
   const [activeTab, setActiveTab] = useState<
     'Overview' | 'Personal Details' | 'Verification' | 'Bank Accounts' | 'Broker Accounts' | 'Documents' | 'Account Activity'
   >('Overview');
@@ -29,13 +33,13 @@ export const ProfileDashboard: React.FC = () => {
   return (
     <div className="flex flex-col gap-8 w-full animate-in fade-in duration-500 pb-16">
       {/* 1. Profile Hero (Personal Investment Identity Center) */}
-      <ProfileHero />
+      <ProfileHero onAddFunds={onAddFunds} />
 
       {/* 2. My Account Dashboard (4 Summary Cards) */}
       <TrustCenter />
 
       {/* 3. Quick Actions Grid */}
-      <QuickActions onActionClick={(tab: any) => setActiveTab(tab)} />
+      <QuickActions onActionClick={(tab: any) => setActiveTab(tab)} onAddFunds={onAddFunds} />
 
       {/* 4. 7 Identity Profile Tabs (Segmented Control) */}
       <div className="flex flex-wrap items-center gap-2 p-1.5 bg-white border border-[#E2E8F0] rounded-2xl w-full shadow-sm relative mt-2">

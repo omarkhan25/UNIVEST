@@ -4,9 +4,10 @@ import { motion } from 'framer-motion';
 
 interface PortfolioHeroProps {
   onReviewAi?: () => void;
+  onAddFunds?: () => void;
 }
 
-export const PortfolioHero: React.FC<PortfolioHeroProps> = ({ onReviewAi }) => {
+export const PortfolioHero: React.FC<PortfolioHeroProps> = ({ onReviewAi, onAddFunds }) => {
   return (
     <section className="relative overflow-hidden rounded-[24px] p-6 md:p-8 shadow-premium-lg bg-brand-navy w-full border border-slate-800">
       {/* Background Effects */}
@@ -86,7 +87,8 @@ export const PortfolioHero: React.FC<PortfolioHeroProps> = ({ onReviewAi }) => {
             <motion.button 
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-white/10 border border-white/20 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-white/20 transition text-sm"
+              onClick={onAddFunds}
+              className="w-full bg-white/10 border border-white/20 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-white/20 transition text-sm cursor-pointer"
             >
               <Wallet className="w-4 h-4" /> Add Funds
             </motion.button>
