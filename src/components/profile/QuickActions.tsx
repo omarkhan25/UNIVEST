@@ -1,25 +1,29 @@
 import React from 'react';
-import { Edit3, Building2, UserPlus, Link2, Shield, Download, LifeBuoy } from 'lucide-react';
+import { Edit3, Building2, UserPlus, Link2, Shield, Download, LifeBuoy, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const actions = [
+  { icon: Wallet, label: 'Add Funds' },
   { icon: Edit3, label: 'Edit Profile' },
   { icon: Building2, label: 'Manage Banks' },
   { icon: UserPlus, label: 'Manage Nominee' },
   { icon: Link2, label: 'Broker Connections' },
   { icon: Shield, label: 'Security Settings' },
-  { icon: Download, label: 'Download Statements' },
+  { icon: Download, label: 'Statements' },
   { icon: LifeBuoy, label: 'Support' },
 ];
 
 interface QuickActionsProps {
   onActionClick?: (tab: string) => void;
+  onAddFunds?: () => void;
 }
 
-export const QuickActions: React.FC<QuickActionsProps> = ({ onActionClick }) => {
+export const QuickActions: React.FC<QuickActionsProps> = ({ onActionClick, onAddFunds }) => {
   const handleAction = (label: string) => {
-    if (label === 'Edit Profile') {
+    if (label === 'Add Funds') {
+      if (onAddFunds) onAddFunds();
+    } else if (label === 'Edit Profile') {
       if (onActionClick) onActionClick('Personal Details');
     } else if (label === 'Manage Banks') {
       if (onActionClick) onActionClick('Bank Accounts');
@@ -29,7 +33,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ onActionClick }) => 
       if (onActionClick) onActionClick('Broker Accounts');
     } else if (label === 'Security Settings') {
       if (onActionClick) onActionClick('Security');
-    } else if (label === 'Download Statements') {
+    } else if (label === 'Statements') {
       toast.success('Downloading P&L & Tax Statement (PDF)...');
     } else if (label === 'Support') {
       toast.success('Opening Priority Investor Support chat...');

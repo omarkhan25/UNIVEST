@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Info, ExternalLink, Calendar, HelpCircle, AlertCircle, ChevronDown } from 'lucide-react';
+import { HolidayCalendarModal } from './HolidayCalendarModal';
+import { TradingHoursModal } from './TradingHoursModal';
 
 export const LiveMarketStatusWidget: React.FC = () => {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isHolidayModalOpen, setIsHolidayModalOpen] = useState(false);
+  const [isTradingHoursModalOpen, setIsTradingHoursModalOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
 
   // Update clock every second/minute
@@ -259,16 +263,38 @@ export const LiveMarketStatusWidget: React.FC = () => {
 
             {/* Links Footer */}
             <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-[10px] font-black text-blue-600">
-              <button onClick={() => toast.success('Holiday Calendar open')} className="hover:underline flex items-center gap-0.5">
+              <button 
+                onClick={() => {
+                  setIsPopoverOpen(false);
+                  setIsHolidayModalOpen(true);
+                }} 
+                className="hover:underline flex items-center gap-0.5 cursor-pointer"
+              >
                 Holiday Calendar →
               </button>
-              <button onClick={() => toast.success('Trading Hours open')} className="hover:underline flex items-center gap-0.5">
+              <button 
+                onClick={() => {
+                  setIsPopoverOpen(false);
+                  setIsTradingHoursModalOpen(true);
+                }} 
+                className="hover:underline flex items-center gap-0.5 cursor-pointer"
+              >
                 Trading Hours →
               </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <HolidayCalendarModal
+        isOpen={isHolidayModalOpen}
+        onClose={() => setIsHolidayModalOpen(false)}
+      />
+
+      <TradingHoursModal
+        isOpen={isTradingHoursModalOpen}
+        onClose={() => setIsTradingHoursModalOpen(false)}
+      />
 
     </div>
   );

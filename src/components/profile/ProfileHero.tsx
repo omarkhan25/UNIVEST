@@ -1,9 +1,13 @@
 import React from 'react';
-import { ShieldCheck, User, Star, Share, Edit3 } from 'lucide-react';
+import { ShieldCheck, User, Star, Share, Edit3, Wallet, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
-export const ProfileHero: React.FC = () => {
+interface ProfileHeroProps {
+  onAddFunds?: () => void;
+}
+
+export const ProfileHero: React.FC<ProfileHeroProps> = ({ onAddFunds }) => {
   return (
     <section className="relative overflow-hidden rounded-[28px] p-8 md:p-10 shadow-premium-lg bg-brand-navy w-full border border-slate-800">
       {/* Background Effects */}
@@ -63,23 +67,34 @@ export const ProfileHero: React.FC = () => {
         </div>
         
         {/* Right side CTAs */}
-        <div className="flex flex-col gap-3 md:min-w-[200px]">
+        <div className="flex flex-col gap-2.5 md:min-w-[220px]">
           <motion.button 
-            onClick={() => toast.success('Edit Profile modal opening...')}
+            onClick={onAddFunds}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full bg-primary text-white font-black py-3.5 rounded-xl shadow-glow-blue flex items-center justify-center gap-2 hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-black py-3.5 rounded-xl shadow-glow-blue flex items-center justify-center gap-2 transition cursor-pointer"
           >
-            <Edit3 className="w-4 h-4" /> Edit Profile
+            <Plus className="w-4 h-4 stroke-[3]" /> Add Funds
           </motion.button>
-          <motion.button 
-            onClick={() => toast.success('Profile link copied to clipboard!')}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full bg-white/10 border border-white/20 text-white font-black py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-white/20 transition"
-          >
-            <Share className="w-4 h-4" /> Share Profile
-          </motion.button>
+
+          <div className="flex gap-2">
+            <motion.button 
+              onClick={() => toast.success('Edit Profile modal opening...')}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex-1 bg-white/10 border border-white/20 text-white font-black py-2.5 rounded-xl flex items-center justify-center gap-1.5 hover:bg-white/20 transition text-xs cursor-pointer"
+            >
+              <Edit3 className="w-3.5 h-3.5" /> Edit
+            </motion.button>
+            <motion.button 
+              onClick={() => toast.success('Profile link copied to clipboard!')}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex-1 bg-white/10 border border-white/20 text-white font-black py-2.5 rounded-xl flex items-center justify-center gap-1.5 hover:bg-white/20 transition text-xs cursor-pointer"
+            >
+              <Share className="w-3.5 h-3.5" /> Share
+            </motion.button>
+          </div>
         </div>
 
       </div>
