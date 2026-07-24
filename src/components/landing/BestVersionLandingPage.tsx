@@ -4,7 +4,7 @@ import {
   Shield, ArrowRight, TrendingUp, TrendingDown, Sparkles, Mail, CheckCircle2, 
   Brain, BarChart3, CandlestickChart, Briefcase, GraduationCap, Bell, Crown, Star, Check, 
   Radio, Lock, ChevronRight, Zap, RefreshCcw, Layers, Award, Terminal, Flame, Sun, Moon,
-  UserCheck, FileCheck, CircleDollarSign
+  UserCheck, FileCheck, CircleDollarSign, Coins, Globe, Landmark, Compass, LineChart, BookOpen, Link, Activity
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MovingTickerRibbon } from '../common/MovingTickerRibbon';
@@ -16,7 +16,7 @@ import { ScrollStepperSection } from './ScrollStepperSection';
 
 export const BestVersionLandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const theme = 'dark';
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSubmitted, setEmailSubmitted] = useState(false);
@@ -62,6 +62,38 @@ export const BestVersionLandingPage: React.FC = () => {
   ];
   const [testimonialIdx, setTestimonialIdx] = useState(0);
 
+  // Dynamic Ticker and Countdown states for the Asset classes mosaic grid
+  const [niftyChange, setNiftyChange] = useState(0.84);
+  const [goldPrice, setGoldPrice] = useState(9845.50);
+  const [ipoCountdown, setIpoCountdown] = useState('2d 04h 12m 35s');
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNiftyChange((prev) => +(prev + (Math.random() * 0.04 - 0.02)).toFixed(2));
+      setGoldPrice((prev) => +(prev + (Math.random() * 2.0 - 1.0)).toFixed(2));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    let seconds = 187955;
+    const interval = setInterval(() => {
+      seconds--;
+      if (seconds < 0) {
+        setIpoCountdown('Ended');
+        clearInterval(interval);
+        return;
+      }
+      const d = Math.floor(seconds / (3600 * 24));
+      const h = Math.floor((seconds % (3600 * 24)) / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      const pad = (num: number) => String(num).padStart(2, '0');
+      setIpoCountdown(`${d}d ${pad(h)}h ${pad(m)}m ${pad(s)}s`);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setSignalIndex((prev) => (prev + 1) % aiSignals.length);
@@ -75,10 +107,6 @@ export const BestVersionLandingPage: React.FC = () => {
     }, 5000);
     return () => clearInterval(timer);
   }, []);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,7 +167,7 @@ export const BestVersionLandingPage: React.FC = () => {
             : 'bg-white/90 backdrop-blur-xl border-slate-200 shadow-xs'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-[50px] py-3.5 flex items-center justify-between">
           <div onClick={() => navigate('/')} className="flex items-center gap-3 cursor-pointer">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-500 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-blue-600/30">
               U
@@ -162,19 +190,6 @@ export const BestVersionLandingPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Sun / Moon Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className={`p-2.5 rounded-xl border transition cursor-pointer ${
-                theme === 'dark'
-                  ? 'bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700'
-                  : 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200'
-              }`}
-              title="Toggle Light/Dark Theme"
-            >
-              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-
             <button
               onClick={() => navigate('/login')}
               className="px-4 py-2.5 text-xs font-black opacity-80 hover:opacity-100 transition cursor-pointer"
@@ -213,7 +228,7 @@ export const BestVersionLandingPage: React.FC = () => {
         <div className="flex-1 flex flex-col justify-center">
 
         {/* Top: Split headline + subtitle */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24 items-center">
+        <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 lg:px-[50px] py-16 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24 items-center">
 
           {/* LEFT: Big Headline */}
           <motion.div
@@ -280,7 +295,7 @@ export const BestVersionLandingPage: React.FC = () => {
       </section>
 
       {/* MAIN CONTAINER — Remaining page sections */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-24">
+      <main className="max-w-[1440px] mx-auto px-6 lg:px-[50px] py-20 space-y-24">
 
         <BentoFeaturesSection theme={theme} />
 
@@ -333,110 +348,462 @@ export const BestVersionLandingPage: React.FC = () => {
 
         <ScrollStepperSection theme={theme} />
 
-        {/* 6. INVEST HUB PREVIEW — 7 ASSET CLASSES */}
-        <section id="invest-hub" className="space-y-12">
+        {/* 6. ONE PLATFORM. EVERY INVESTMENT. (RE-DESIGNED ASSET HUB MOSAIC) */}
+        <section id="invest-hub" className="space-y-16">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <span className="text-xs font-black uppercase tracking-wider text-amber-500 bg-amber-500/10 px-4 py-1.5 rounded-full border border-amber-500/20">
-              Multi-Asset Universe
+            <span className="text-xs font-black uppercase tracking-wider text-blue-500 bg-blue-500/10 px-4 py-1.5 rounded-full border border-blue-500/20">
+              Asset Universe
             </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black font-display">
-              7 Dedicated Asset Classes
+            <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-black font-display tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+              One Platform. Every Investment.
             </h2>
-            <p className="opacity-80 text-sm font-medium">Trade stocks, mutual funds, ETFs, IPOs, gold, and commodities from one dashboard.</p>
+            <p className={`opacity-80 text-sm font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+              Access stocks, mutual funds, ETFs, IPOs, gold, bonds and global markets from one intelligent investment platform.
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className={`p-5 rounded-2xl border space-y-2 font-mono ${theme === 'dark' ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200 shadow-xs'}`}>
-              <span className="text-xs font-bold opacity-70 block">Equities & Stocks</span>
-              <span className="text-lg font-black block">4,000+ Listed</span>
-              <span className="text-[11px] text-emerald-500 block">RSI & P/E Filters</span>
-            </div>
-
-            <div className={`p-5 rounded-2xl border space-y-2 font-mono ${theme === 'dark' ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200 shadow-xs'}`}>
-              <span className="text-xs font-bold opacity-70 block">Mutual Funds</span>
-              <span className="text-lg font-black block">24.2% Top CAGR</span>
-              <span className="text-[11px] text-blue-500 block">SIP Calculator</span>
-            </div>
-
-            <div className={`p-5 rounded-2xl border space-y-2 font-mono ${theme === 'dark' ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200 shadow-xs'}`}>
-              <span className="text-xs font-bold opacity-70 block">ETFs & Index</span>
-              <span className="text-lg font-black block">Low Expense</span>
-              <span className="text-[11px] text-purple-500 block">0.05% TER</span>
-            </div>
-
-            <div className={`p-5 rounded-2xl border border-amber-500/40 space-y-2 font-mono ${theme === 'dark' ? 'bg-gradient-to-br from-amber-950/20 to-[#1E293B]' : 'bg-amber-50 border-amber-300'}`}>
-              <div className="flex items-center gap-1 text-[10px] text-amber-500 font-bold">
-                <Flame className="w-3.5 h-3.5" /> TRENDING IPO
+          {/* Asymmetric Mosaic Grid */}
+          <div className="grid grid-cols-12 gap-6 items-stretch">
+            
+            {/* STOCKS CARD (Featured - col-span-8) */}
+            <motion.div
+              whileHover={{ y: -5 }}
+              className={`col-span-12 lg:col-span-8 p-6 rounded-3xl border flex flex-col justify-between min-h-[240px] transition-all duration-300 relative overflow-hidden group ${
+                theme === 'dark'
+                  ? 'bg-[#0A0F1D]/60 border-white/[0.08] hover:border-blue-500/40 hover:shadow-[0_8px_32px_rgba(59,130,246,0.06)]'
+                  : 'bg-white border-slate-200/80 hover:border-blue-500/30 hover:shadow-[0_8px_32px_rgba(59,130,246,0.04)] shadow-xs'
+              }`}
+            >
+              {/* Card background sparkline graph drawing */}
+              <div className="absolute inset-0 opacity-15 pointer-events-none flex items-end justify-end p-2 z-0">
+                <svg className="w-48 h-20 text-emerald-400 overflow-visible" viewBox="0 0 100 30" fill="none">
+                  <path
+                    d="M0,25 Q15,28 30,12 T60,8 T80,22 T100,5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </div>
-              <span className="text-lg font-black block">Ola Electric</span>
-              <span className="text-[11px] text-amber-500 block">GMP: +₹42 (38%)</span>
-            </div>
 
-            <div className={`p-5 rounded-2xl border space-y-2 font-mono ${theme === 'dark' ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200 shadow-xs'}`}>
-              <span className="text-xs font-bold opacity-70 block">24K Digital Gold</span>
-              <span className="text-lg font-black block">₹7,240 / g</span>
-              <span className="text-[11px] text-amber-500 block">99.9% Pure SGB</span>
-            </div>
-
-            <div className={`p-5 rounded-2xl border space-y-2 font-mono ${theme === 'dark' ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200 shadow-xs'}`}>
-              <span className="text-xs font-bold opacity-70 block">MCX Commodities</span>
-              <span className="text-lg font-black block">Crude & Silver</span>
-              <span className="text-[11px] text-rose-500 block">Margin Active</span>
-            </div>
-
-            <div className="col-span-2 bg-gradient-to-r from-blue-600 to-emerald-500 p-5 rounded-2xl text-white font-mono flex items-center justify-between shadow-lg">
-              <div>
-                <span className="text-xs font-bold uppercase block opacity-90">All-in-One Asset Hub</span>
-                <span className="text-lg font-black block">Explore All Products</span>
+              <div className="relative z-10 space-y-3 text-left">
+                <div className="flex justify-between items-start">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 uppercase tracking-wider font-mono">
+                    Live Today
+                  </span>
+                </div>
+                <div>
+                  <h4 className={`text-lg font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Stocks</h4>
+                  <p className={`text-xs mt-1 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Invest in 4,300+ listed NSE & BSE companies with SEBI-registered advisory models and smart scanners.
+                  </p>
+                </div>
               </div>
-              <button onClick={() => navigate('/dashboard')} className="px-4 py-2 bg-white text-slate-900 font-black text-xs rounded-xl shadow-md cursor-pointer">
-                View Hub
-              </button>
-            </div>
+
+              <div className="relative z-10 flex justify-between items-end border-t border-slate-800/40 pt-4 mt-4 font-mono">
+                <div>
+                  <span className="text-[8px] text-slate-500 uppercase block font-bold">NIFTY index trend</span>
+                  <span className="text-xs font-black text-emerald-400">▲ +{niftyChange}%</span>
+                </div>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className={`text-xs font-black flex items-center gap-1 group-hover:text-blue-400 transition-colors ${
+                    theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                  }`}
+                >
+                  Explore Stocks <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </motion.div>
+
+            {/* MUTUAL FUNDS CARD (col-span-4) */}
+            <motion.div
+              whileHover={{ y: -5 }}
+              className={`col-span-12 md:col-span-6 lg:col-span-4 p-6 rounded-3xl border flex flex-col justify-between min-h-[240px] transition-all duration-300 group ${
+                theme === 'dark'
+                  ? 'bg-[#0A0F1D]/60 border-white/[0.08] hover:border-purple-500/40 hover:shadow-[0_8px_32px_rgba(168,85,247,0.06)]'
+                  : 'bg-white border-slate-200/80 hover:border-purple-500/30 hover:shadow-[0_8px_32px_rgba(168,85,247,0.04)] shadow-xs'
+              }`}
+            >
+              <div className="space-y-4 text-left">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
+                  <Briefcase className="w-5 h-5 text-purple-500" />
+                </div>
+                <div>
+                  <h4 className={`text-lg font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Mutual Funds</h4>
+                  <p className={`text-xs mt-1 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                    4,500+ direct mutual funds options. Smart categorisations designed for horizon wealth.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3.5 mt-4 text-left">
+                <div className="flex flex-wrap gap-1.5">
+                  {['Large Cap', 'Flexi Cap', 'Small Cap'].map((tag) => (
+                    <span
+                      key={tag}
+                      className={`text-[8px] font-black px-2 py-0.5 rounded-md border font-mono ${
+                        theme === 'dark'
+                          ? 'bg-slate-900/60 border-slate-800 text-slate-400'
+                          : 'bg-slate-50 border-slate-200 text-slate-600'
+                      }`}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <div className="flex justify-between items-center border-t border-slate-800/40 pt-3 font-mono">
+                  <span className="text-[9px] text-slate-500 font-bold">Zero-commission</span>
+                  <button onClick={() => navigate('/dashboard')} className="text-xs font-black flex items-center gap-1 group-hover:text-purple-400 transition-colors">
+                    Explore <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* EXCHANGE TRADED FUNDS (ETFs - col-span-4) */}
+            <motion.div
+              whileHover={{ y: -5 }}
+              className={`col-span-12 md:col-span-6 lg:col-span-4 p-6 rounded-3xl border flex flex-col justify-between min-h-[240px] transition-all duration-300 group ${
+                theme === 'dark'
+                  ? 'bg-[#0A0F1D]/60 border-white/[0.08] hover:border-emerald-500/40 hover:shadow-[0_8px_32px_rgba(16,185,129,0.06)]'
+                  : 'bg-white border-slate-200/80 hover:border-emerald-500/30 hover:shadow-[0_8px_32px_rgba(16,185,129,0.04)] shadow-xs'
+              }`}
+            >
+              <div className="space-y-4 text-left">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                  <Layers className="w-5 h-5 text-emerald-500" />
+                </div>
+                <div>
+                  <h4 className={`text-lg font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Exchange Traded Funds</h4>
+                  <p className={`text-xs mt-1 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Low cost Index & Commodity ETFs tracking global and Indian benchmarks efficiently.
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-800/40 pt-4 mt-4 flex justify-between items-center font-mono text-left">
+                <div>
+                  <span className="text-[7px] text-slate-500 uppercase block font-bold">Gold & Index ETFs</span>
+                  <span className="text-xs font-black text-emerald-400">0.05% TER Min</span>
+                </div>
+                <button onClick={() => navigate('/dashboard')} className="text-xs font-black flex items-center gap-1 group-hover:text-emerald-400 transition-colors">
+                  Explore <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </motion.div>
+
+            {/* DIGITAL GOLD (col-span-4) */}
+            <motion.div
+              whileHover={{ y: -5 }}
+              animate={{
+                background: theme === 'dark'
+                  ? [
+                      'linear-gradient(to bottom right, rgba(10,15,29,0.6), rgba(10,15,29,0.6))',
+                      'linear-gradient(to bottom right, rgba(245,158,11,0.05), rgba(10,15,29,0.6))',
+                      'linear-gradient(to bottom right, rgba(10,15,29,0.6), rgba(10,15,29,0.6))'
+                    ]
+                  : [
+                      'linear-gradient(to bottom right, rgba(255,255,255,1), rgba(255,255,255,1))',
+                      'linear-gradient(to bottom right, rgba(254,243,199,0.3), rgba(255,255,255,1))',
+                      'linear-gradient(to bottom right, rgba(255,255,255,1), rgba(255,255,255,1))'
+                    ]
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+              className={`col-span-12 md:col-span-6 lg:col-span-4 p-6 rounded-3xl border flex flex-col justify-between min-h-[240px] transition-all duration-300 group ${
+                theme === 'dark'
+                  ? 'border-white/[0.08] hover:border-amber-500/40 hover:shadow-[0_8px_32px_rgba(245,158,11,0.06)]'
+                  : 'border-slate-200/80 hover:border-amber-500/30 hover:shadow-[0_8px_32px_rgba(245,158,11,0.04)] shadow-xs'
+              }`}
+            >
+              <div className="space-y-4 text-left">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                  <Coins className="w-5 h-5 text-amber-500" />
+                </div>
+                <div>
+                  <h4 className={`text-lg font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>24K Digital Gold</h4>
+                  <p className={`text-xs mt-1 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Secure fractional ownership with 99.99% purity vaults. Pure gold assets backed by secure trustee vaults.
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-800/40 pt-4 mt-4 flex justify-between items-center font-mono text-left">
+                <div>
+                  <span className="text-[7px] text-slate-500 uppercase block font-bold">Gold Live Price</span>
+                  <span className="text-xs font-black text-amber-500">₹{goldPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / g</span>
+                </div>
+                <button onClick={() => navigate('/dashboard')} className="text-xs font-black flex items-center gap-1 group-hover:text-amber-500 transition-colors">
+                  Buy Instantly <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </motion.div>
+
+            {/* TRENDING IPO (col-span-4) */}
+            <motion.div
+              whileHover={{ y: -5 }}
+              className={`col-span-12 md:col-span-6 lg:col-span-4 p-6 rounded-3xl border flex flex-col justify-between min-h-[240px] transition-all duration-300 group ${
+                theme === 'dark'
+                  ? 'bg-gradient-to-br from-amber-950/10 to-[#0A0F1D]/60 border-amber-500/30 hover:border-amber-500/60 hover:shadow-[0_8px_32px_rgba(245,158,11,0.08)]'
+                  : 'bg-amber-50/40 border-amber-300/60 hover:border-amber-500/40 hover:shadow-[0_8px_32px_rgba(245,158,11,0.06)] shadow-xs'
+              }`}
+            >
+              <div className="space-y-4 text-left">
+                <div className="flex justify-between items-start">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center">
+                    <Flame className="w-5 h-5 text-amber-500 animate-pulse" />
+                  </div>
+                  <span className="text-[9px] font-black text-amber-500 bg-amber-500/15 px-2.5 py-1 rounded-full border border-amber-500/20 uppercase tracking-wider font-mono">
+                    Trending IPO
+                  </span>
+                </div>
+                <div>
+                  <h4 className={`text-lg font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Ola Electric IPO</h4>
+                  <p className={`text-xs mt-1 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Apply securely using UPI ASBA pipeline with NSDL subscription tracking.
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-800/40 pt-4 mt-4 flex justify-between items-end font-mono text-left">
+                <div>
+                  <span className="text-[7px] text-slate-500 uppercase block font-bold">Closes In</span>
+                  <span className="text-xs font-black text-amber-500 animate-pulse">{ipoCountdown}</span>
+                </div>
+                <div>
+                  <span className="text-[7px] text-slate-500 uppercase block font-bold text-right">Subscription</span>
+                  <span className="text-xs font-bold text-white block text-right">6.8×</span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* COMMODITIES (col-span-4) */}
+            <motion.div
+              whileHover={{ y: -5 }}
+              className={`col-span-12 md:col-span-6 lg:col-span-3 p-6 rounded-3xl border flex flex-col justify-between min-h-[240px] transition-all duration-300 group ${
+                theme === 'dark'
+                  ? 'bg-[#0A0F1D]/60 border-white/[0.08] hover:border-rose-500/40 hover:shadow-[0_8px_32px_rgba(244,63,94,0.06)]'
+                  : 'bg-white border-slate-200/80 hover:border-rose-500/30 hover:shadow-[0_8px_32px_rgba(244,63,94,0.04)] shadow-xs'
+              }`}
+            >
+              <div className="space-y-4 text-left">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+                  <Compass className="w-5 h-5 text-rose-500" />
+                </div>
+                <div>
+                  <h4 className={`text-lg font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>MCX Commodities</h4>
+                  <p className={`text-xs mt-1 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Trade Crude Oil, Silver, Gold, and Natural Gas on MCX with optimized margins.
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-800/40 pt-4 mt-4 flex justify-between items-center font-mono text-left">
+                <div>
+                  <span className="text-[7px] text-slate-500 uppercase block font-bold">MCX Live Spreads</span>
+                  <span className="text-xs font-black text-rose-400">Margin Active</span>
+                </div>
+                <button onClick={() => navigate('/dashboard')} className="text-xs font-black flex items-center gap-1 group-hover:text-rose-400 transition-colors">
+                  Explore <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </motion.div>
+
+            {/* FIXED INCOME BONDS (col-span-5) */}
+            <motion.div
+              whileHover={{ y: -5 }}
+              className={`col-span-12 md:col-span-6 lg:col-span-5 p-6 rounded-3xl border flex flex-col justify-between min-h-[240px] transition-all duration-300 group ${
+                theme === 'dark'
+                  ? 'bg-[#0A0F1D]/60 border-white/[0.08] hover:border-blue-500/40 hover:shadow-[0_8px_32px_rgba(59,130,246,0.06)]'
+                  : 'bg-white border-slate-200/80 hover:border-blue-500/30 hover:shadow-[0_8px_32px_rgba(59,130,246,0.04)] shadow-xs'
+              }`}
+            >
+              <div className="space-y-4 text-left">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                  <Landmark className="w-5 h-5 text-blue-500" />
+                </div>
+                <div>
+                  <h4 className={`text-lg font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Bonds & Fixed Income</h4>
+                  <p className={`text-xs mt-1 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Government and Corporate bonds offering predictable income and secured returns.
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-800/40 pt-4 mt-4 flex justify-between items-center font-mono text-left">
+                <div>
+                  <span className="text-[7px] text-slate-500 uppercase block font-bold">Tax-Free Yields</span>
+                  <span className="text-xs font-black text-blue-400">7.45% Avg Yield</span>
+                </div>
+                <button onClick={() => navigate('/dashboard')} className="text-xs font-black flex items-center gap-1 group-hover:text-blue-400 transition-colors">
+                  View Bonds <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </motion.div>
+
+            {/* US STOCKS (col-span-4) */}
+            <motion.div
+              className={`col-span-12 md:col-span-6 lg:col-span-4 p-6 rounded-3xl border flex flex-col justify-between min-h-[240px] transition-all duration-300 opacity-65 group ${
+                theme === 'dark' ? 'bg-[#0A0F1D]/30 border-white/[0.04]' : 'bg-slate-50/50 border-slate-200 shadow-xs'
+              }`}
+            >
+              <div className="space-y-4 text-left">
+                <div className="flex justify-between items-start">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/5 border border-blue-500/10 flex items-center justify-center">
+                    <Globe className="w-5 h-5 text-slate-500" />
+                  </div>
+                  <span className="text-[8px] font-black text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20 uppercase tracking-widest font-mono">
+                    Coming Soon
+                  </span>
+                </div>
+                <div>
+                  <h4 className={`text-lg font-black ${theme === 'dark' ? 'text-slate-500' : 'text-slate-700'}`}>US Stocks</h4>
+                  <p className="text-xs mt-1 leading-relaxed text-slate-500">
+                    Fractional investing in global leaders like Apple, Tesla, Microsoft and NVIDIA.
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-800/40 pt-4 mt-4 flex justify-between items-center font-mono text-left">
+                <span className="text-[8px] text-slate-500 uppercase font-bold">Global Markets</span>
+                <span className="text-[10px] font-bold text-blue-500">Notify Me</span>
+              </div>
+            </motion.div>
+
           </div>
         </section>
 
-        {/* 7. PORTFOLIO PREVIEW — SINGLE SPOTLIGHT HERO PANEL */}
-        <section
-          id="portfolio-spotlight"
-          className={`rounded-3xl p-8 sm:p-12 border shadow-2xl relative overflow-hidden transition-colors ${
-            theme === 'dark' ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200'
-          }`}
-        >
-          <div className="grid lg:grid-cols-2 gap-10 items-center">
-            <div className="space-y-6 font-mono">
-              <span className="text-xs font-bold text-blue-500 uppercase tracking-widest block">Portfolio Spotlight</span>
-              <h2 className="text-3xl sm:text-4xl font-black font-display leading-tight">
-                Total Net Wealth: <span className="text-emerald-500">₹8,42,150.00</span>
-              </h2>
-              <div className={`grid grid-cols-2 gap-4 text-xs pt-4 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}>
-                <div>
-                  <span className="opacity-70 block text-[10px]">Overall Returns</span>
-                  <span className="font-black text-emerald-500 text-lg">+20.3% (+₹1,42,150)</span>
-                </div>
-                <div>
-                  <span className="opacity-70 block text-[10px]">CAGR XIRR</span>
-                  <span className="font-black text-blue-500 text-lg">22.4%</span>
-                </div>
-              </div>
+        {/* ── WHY INVESTORS CHOOSE UNIVEST FEATURE BANNER & PATHWAY ─────── */}
+        <section className={`rounded-3xl border p-8 sm:p-12 relative overflow-hidden transition-all duration-300 ${
+          theme === 'dark'
+            ? 'bg-[#0A0F1D]/80 border-white/[0.08] shadow-[0_8px_48px_rgba(0,0,0,0.5)]'
+            : 'bg-white border-slate-200/80 shadow-sm'
+        }`}>
+          {/* Subtle background glow mesh */}
+          <div className="absolute inset-0 z-0 bg-gradient-to-tr from-blue-500/5 via-transparent to-emerald-500/5 opacity-40 pointer-events-none" />
+
+          <div className="relative z-10 max-w-5xl mx-auto space-y-12">
+            
+            {/* Header */}
+            <div className="text-center space-y-3.5">
+              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-500 bg-emerald-500/10 px-4 py-1.5 rounded-full border border-emerald-500/20">
+                Core Advantages
+              </span>
+              <h3 className={`text-4xl font-extrabold font-display tracking-tight text-center ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                Why Investors Choose Univest
+              </h3>
+              <p className={`text-sm sm:text-base max-w-3xl mx-auto leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                Univest provides an integrated multi-agent AI engine and certified Research Analysts to secure and scale your wealth portfolio.
+              </p>
             </div>
 
-            <div className={`rounded-2xl p-6 border space-y-4 font-mono text-xs ${
-              theme === 'dark' ? 'bg-[#0F172A] border-slate-800' : 'bg-slate-50 border-slate-200'
-            }`}>
-              <div className={`flex justify-between items-center pb-3 border-b ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}>
-                <span className="opacity-70">Top Holding</span>
-                <span className="text-emerald-500 font-bold">RELIANCE (35% Weight)</span>
-              </div>
-              <div className={`flex justify-between items-center pb-3 border-b ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}>
-                <span className="opacity-70">Today's P&L</span>
-                <span className="text-emerald-500 font-bold">+₹14,820.50 (+1.79%)</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="opacity-70">Rebalance Signal</span>
-                <span className="text-blue-500 font-bold">Optimal Allocation</span>
-              </div>
+            {/* Advantage Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 text-left">
+              {[
+                {
+                  icon: Sparkles,
+                  title: 'AI Research & Signals',
+                  desc: 'Certified SEBI advisory calls with entries, targets, and exit levels generated by smart algorithms.'
+                },
+                {
+                  icon: Activity,
+                  title: 'Market Intelligence',
+                  desc: 'Sub-second NSDL tracking and live NIFTY tick feeds reporting market anomalies in real time.'
+                },
+                {
+                  icon: Layers,
+                  title: 'Multi-Asset Investing',
+                  desc: 'Equities, Direct Mutual Funds, Corporate Bonds, and Gold managed from a single unified wallet.'
+                },
+                {
+                  icon: BarChart3,
+                  title: 'Portfolio Insights',
+                  desc: 'Deep analytical diagnostics tracking CAGR performance, XIRR returns, and potential risk leakage.'
+                },
+                {
+                  icon: Brain,
+                  title: 'AI Advisors Monitoring',
+                  desc: 'Autonomous multi-agents calibrating horizons, rebalancing configurations, and guarding gains 24/7.'
+                },
+                {
+                  icon: Terminal,
+                  title: 'Fast Order Execution',
+                  desc: 'One-tap trade execution pipelines integrated directly into India’s major broker terminals.'
+                }
+              ].map((adv, idx) => {
+                const AIcon = adv.icon;
+                return (
+                  <div key={idx} className="space-y-3">
+                    <div className={`w-12 h-12 rounded-xl border flex items-center justify-center ${
+                      theme === 'dark' ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-500/5 border-blue-500/15'
+                    }`}>
+                      <AIcon className={`w-6 h-6 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
+                    </div>
+                    <h4 className={`text-base sm:text-lg font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{adv.title}</h4>
+                    <p className={`text-xs sm:text-sm leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>{adv.desc}</p>
+                  </div>
+                );
+              })}
             </div>
+
+            {/* Investment Journey Pathway */}
+            <div className="pt-10 border-t border-slate-800/40 mt-10">
+              <span className={`text-xs font-black uppercase tracking-widest block text-center mb-6 font-mono ${
+                theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+              }`}>
+                The AI-Powered Investment Journey
+              </span>
+              
+              <div className="relative flex flex-col md:flex-row items-center justify-between gap-6 max-w-5xl mx-auto px-4 py-4 overflow-hidden md:overflow-visible">
+                {/* Connecting Line Track */}
+                <div className={`absolute top-[38px] left-10 right-10 h-[2px] hidden md:block z-0 ${theme === 'dark' ? 'bg-slate-800/80' : 'bg-slate-200'}`} />
+                
+                {/* Active Pulsing Laser Dash */}
+                <div className="absolute top-[38px] left-10 right-10 h-[2px] hidden md:block z-0 overflow-hidden pointer-events-none">
+                  <motion.div
+                    animate={{ x: ['-100%', '100%'] }}
+                    transition={{ duration: 4.5, repeat: Infinity, ease: 'linear' }}
+                    className="w-1/3 h-full bg-gradient-to-r from-transparent via-emerald-400 to-transparent"
+                  />
+                </div>
+
+                {/* Pathway Nodes */}
+                {[
+                  { label: '1. Select Stocks', desc: 'Browse Asset Classes', icon: TrendingUp },
+                  { label: '2. AI Research', desc: 'SEBI Compliant Advisory', icon: Shield },
+                  { label: '3. Calibrate Target', desc: 'CAGR Optimized Profile', icon: Brain },
+                  { label: '4. Unified Portfolio', desc: 'Monitor Real-Time Wealth', icon: Layers },
+                  { label: '5. Wealth Growth', desc: 'Automated Rebalancing', icon: CheckCircle2 }
+                ].map((node, i) => {
+                  const NIcon = node.icon;
+                  return (
+                    <div
+                      key={i}
+                      className={`flex items-center gap-3 md:flex-col md:text-center md:gap-2.5 px-5 py-4 rounded-2xl border z-10 w-full md:w-[185px] shadow-lg relative ${
+                        theme === 'dark'
+                          ? 'bg-[#050914] border-slate-800'
+                          : 'bg-slate-50 border-slate-200 shadow-sm'
+                      }`}
+                    >
+                      <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 border ${
+                        theme === 'dark' ? 'bg-emerald-500/10 border-emerald-500/25' : 'bg-emerald-500/5 border-emerald-500/15'
+                      }`}>
+                        <NIcon className={`w-5.5 h-5.5 ${theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'}`} />
+                      </div>
+                      <div className="text-left md:text-center min-w-0">
+                        <span className={`text-xs font-black block truncate ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{node.label}</span>
+                        <span className={`text-[10px] font-bold block truncate mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>{node.desc}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
+
           </div>
         </section>
 
@@ -568,7 +935,7 @@ export const BestVersionLandingPage: React.FC = () => {
       <footer className={`font-mono text-xs border-t py-12 ${
         theme === 'dark' ? 'bg-[#080D1A] border-slate-800 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-600'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-[50px] space-y-6">
           <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b ${
             theme === 'dark' ? 'border-slate-800' : 'border-slate-300'
           }`}>
